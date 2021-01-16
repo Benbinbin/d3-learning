@@ -46,17 +46,20 @@ root.descendants().forEach((d, i) => {
 const svg = d3.create("svg")
   .attr("viewBox", [-40, -10, width, dx]) // 这里视图设置为 dx 或 0 都没关系，因为 update 会基于节点数量来动态调整该值
   .style("font", "10px sans-serif")
+
+const container = svg.append("g")
+  .attr("class", "container")
 // .style("user-select", "none"); // 这里限制用户选择节点字体
 
 // 创建节点间连线的容器 <g>，并设置线条的样式
-const gLink = svg.append("g")
+const gLink = container.append("g")
   .attr("fill", "none")
   .attr("stroke", "#555")
   .attr("stroke-opacity", 0.4)
   .attr("stroke-width", 1.5);
 
 // 创建节点间连线的容器 <g>，并设置鼠标悬浮时的样式
-const gNode = svg.append("g")
+const gNode = container.append("g")
   .attr("cursor", "pointer")
   .attr("pointer-events", "all");
 
@@ -64,7 +67,7 @@ const gNode = svg.append("g")
  * 响应用户操作（点击节点展开或搜索子树），重新计算数据的层次布局并渲染树图
  * 封装为一个函数便于不断调用（递归调用）
  */
-function update(source, duration=250) {
+function update(source, duration = 250) {
   const nodes = root.descendants().reverse(); // 返回包含树中所有节点的数组，并进行倒序?
   const links = root.links(); // 返回包含树中所有的节点配对关系的数组
   /**
@@ -92,7 +95,7 @@ function update(source, duration=250) {
   // 设置动效，主要是响应式地设置 svg 的 viewBox 高度以缩放展示完整的树图
   const transition = svg.transition()
     .duration(duration)
-    .attr("viewBox", [-40, left.x - 10, width, height])
+    .attr("viewBox", [-40, left.x - 10, width, height*3])
   // .tween("resize", window.ResizeObserver ? null : () => () => svg.dispatch("toggle")); // 使用 d3-transition 模块的 tween() 方法生成定制的补间动画
 
   /**
@@ -119,7 +122,7 @@ function update(source, duration=250) {
 
   // 为带有 children 属性的节点绑定点击事件，当用户点击节点时，切换 children 属性值（在 null 和预先设置的 _children 之间切换），！！！这会改变树的数据结构
   hasChildrenNode.on("click", (event, d) => {
-    // console.log(event.altKey);
+    console.log(event.altKey);
     duration = event.altKey ? 1000 : 250; // 预设动画持续时间是 250ms，当按住 alt 键点击节点，动画持续更长时间
     d.children = d.children ? null : d._children;
     update(d, duration); // 然后调用 update() 函数，传递当前点击的节点作为 source，因此新增或移除的节点的「伸缩」起点或终点就是父节点
@@ -203,3 +206,30 @@ update(root);
 // 将创建的 <svg> 元素挂载到页面上
 // console.log(svg.node());
 d3.select("body").append(() => svg.node())
+
+/**
+ * 添加 svg 拖动和缩放功能
+ */
+
+const zoom = d3.zoom()
+  .scaleExtent([1, 10]) // 设置缩放范围最小是原始大小，最大是 40 倍
+  // 监听缩放事件（d3 将鼠标滚动和鼠标拖移、触控双指捏合、触控单指移动等多种事件整合，而且分为三种阶段：start、zoom、end。可以针对缩放事件的特定阶段进行监听）
+  .on("zoom", (event) => {
+    console.log(event);
+    zoomHandler(event) // 事件对象中 transform 属性包含了当前的缩放变换信息
+  })
+// 如果需要针对特定的缩放操作作出特定的响应，可以在之后设置特定的事件侦听，如 on("dblclick.zoom", null) 取消双击事件的侦听（默认双击放大）
+
+function zoomHandler(event) {
+  console.log(container.node());
+  console.log(`translate(${event.transform.x}, ${event.transform.y}) scale(${event.transform.k})`);
+  // 通过 CSS 将变换应用到 HTML 元素
+  // 注意变换的顺序，平移一定要在缩放前
+  container.attr(
+    "transform",
+    `translate(${event.transform.x}, ${event.transform.y}) scale(${event.transform.k})`);
+}
+
+// 一般采用 <svg><g class="container"></g></svg> 结构，方便为整个 svg 添加 zoom 事件侦听，然后对内部的 <g> 元素进行缩放和拖移操作（更新 transform 状态），这样避免可能发生抖动的情况。
+svg.call(zoom); // 使用 selection.call(zoom) 为特定的选择集应用预设的缩放行为
+
