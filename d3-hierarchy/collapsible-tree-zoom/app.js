@@ -64,9 +64,7 @@ const gNode = svg.append("g")
  * 响应用户操作（点击节点展开或搜索子树），重新计算数据的层次布局并渲染树图
  * 封装为一个函数便于不断调用（递归调用）
  */
-function update(source, duration = 250) {
-  // d3.js v6 版本已经删除了 d3.event 这个 API
-  // const duration = d3.event && d3.event.altKey ? 2500 : 250; // 当按住 alt 键点击节点，动画持续更长时间
+function update(source, duration=250) {
   const nodes = root.descendants().reverse(); // 返回包含树中所有节点的数组，并进行倒序?
   const links = root.links(); // 返回包含树中所有的节点配对关系的数组
   /**
@@ -124,7 +122,7 @@ function update(source, duration = 250) {
     // console.log(event.altKey);
     duration = event.altKey ? 1000 : 250; // 预设动画持续时间是 250ms，当按住 alt 键点击节点，动画持续更长时间
     d.children = d.children ? null : d._children;
-    update(d, duration);  // 然后调用 update() 函数，传递当前点击的节点作为 source，因此新增或移除的节点的「伸缩」起点或终点就是父节点
+    update(d, duration); // 然后调用 update() 函数，传递当前点击的节点作为 source，因此新增或移除的节点的「伸缩」起点或终点就是父节点
   });
 
   console.log(hasChildrenNode);
