@@ -10,49 +10,72 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
     crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
 
 <body>
   <div class="container">
     <h1 class="text-center fw-bold m-5">Learning D3.js</h1>
     <p class="fw-light text-center">通过阅读官方样例的每一行代码并复现样例学习 D3.js。</p>
-    <section>
-          <h2 class="my-4">
-            <span class="border-bottom border-5 border-primary"><a href="https://github.com/d3/d3-hierarchy" target="_blank" style="text-decoration: none;color: black">d3-hierarchy</a></span>
-          </h2>
-              <div class="row row-cols-1 row-cols-md-3 g-4">
-                <div class="col">
-                  <div class="card h-100">
-                    <div class="card-body">
-                      <h3 class="card-title fw-bold">Tidy Tree</h3>
-                      <p class="card-text">紧凑型的树图 tree diagram。</p>
-                    </div>
-                    <div class="card-footer">
-                      <a class="btn btn-outline-primary" href="https://observablehq.com/@d3/tidy-tree" role="button" target="_blank">官方样例</a>
-                      <a class="btn btn-outline-primary" href="./d3-hierarchy/static-tree-diagram/index.html" role="button" target="_blank">演示</a>
-                      <a class="btn btn-outline-primary" href="https://github.com/Benbinbin/d3-learning/blob/main/d3-hierarchy/static-tree-diagram/app.js" role="button" target="_blank">核心代码</a>
-                    </div>
-                  </div>
-                </div>
-                <div class="col">
-                  <div class="card h-100">
-                    <div class="card-body">
-                      <h3 class="card-title fw-bold">Collapsible Tree</h3>
-                      <p class="card-text">可交互（子树可伸缩）的树图 tree diagram。</p>
-                    </div>
-                    <div class="card-footer">
-                      <a class="btn btn-outline-primary" href="https://observablehq.com/@d3/collapsible-tree" role="button" target="_blank">官方样例</a>
-                      <a class="btn btn-outline-primary" href="./d3-hierarchy/collapsible-tree/index.html" role="button" target="_blank">演示</a>
-                      <a class="btn btn-outline-primary" href="https://github.com/Benbinbin/d3-learning/blob/main/d3-hierarchy/collapsible-tree/app.js" role="button" target="_blank">核心代码</a>
-                    </div>
-                  </div>
-                </div>
-
+    <div id="main">
+      <section v-for="item of content">
+        <h2 class="my-4">
+          <span class="border-bottom border-5 border-primary"><a :href=`https://github.com/d3/${item.module}` target="_blank" style="text-decoration: none;color: black">{{ item.module }}</a></span>
+        </h2>
+        <div class="row g-4">
+          <div class="col-12 col-md-6 col-lg-4" v-for="example of item.examples">
+            <div class="card h-100">
+              <div class="card-body">
+                <h3 class="card-title fw-bold">{{ example.name }}</h3>
+                <p class="card-text">{{ example.description }}</p>
               </div>
-    </section>
-
-
+              <div class="card-footer">
+                <a class="btn btn-outline-primary" :href='example.source' role="button"
+                  target="_blank">官方样例</a>
+                <a class="btn btn-outline-success" :href=`./d3-hierarchy/${example.folder}/index.html` role="button"
+                  target="_blank">演示</a>
+                <a class="btn btn-outline-primary"
+                  :href=`https://github.com/Benbinbin/d3-learning/blob/main/d3-hierarchy/${example.folder}/app.js`
+                  role="button" target="_blank">核心代码</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
+  <script>
+    new Vue({
+      el: '#main',
+      data: {
+        content: [
+          {
+            module: 'd3-hierarchy',
+            examples: [
+              {
+                name: 'Tidy Tree',
+                description: '紧凑型的树图 tree diagram。',
+                source: 'https://observablehq.com/@d3/tidy-tree',
+                folder: 'static-tree-diagram',
+              },
+              {
+                name: 'Collapsible Tree',
+                description: '可交互（子树可伸缩）的树图 tree diagram。',
+                source: 'https://observablehq.com/@d3/collapsible-tree',
+                folder: 'collapsible-tree',
+              },
+              {
+                name: 'Collapsible Tree Zoom',
+                description: '可交互（子树可伸缩，树图整体可缩放移动）的树图 tree diagram。',
+                source: 'https://observablehq.com/@d3/collapsible-tree',
+                folder: 'collapsible-tree-zoom',
+              },
+            ]
+          }
+        ]
+      }
+    })
+  </script>
 </body>
 
 </html>
