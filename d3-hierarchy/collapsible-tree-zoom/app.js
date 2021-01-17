@@ -1,61 +1,71 @@
 // 设置布局的节点尺寸，由于渲染的是水平布局树图，在设置坐标或宽高是部分函数在传递参数值时可能需要对调
 
 /**
- * 结构化数据
- * d3.hierarchy()
+ * 读取数据
+ * d3.json()
  */
 d3.json('./data.json').then(data => {
+  /**
+   * 结构化数据
+   * d3.hierarchy()
+   */
   let root = d3.hierarchy(data);
 
+  // !!!这一步修改树的结构，因此初始化的树并不是一棵完整的树
+  root.descendants().forEach((d, i) => {
+    d.id = i; // 将数列的索引设置为节点的 id 属性，作为各节点添加唯一标识值，在后面将节点数据与 DOM 元素绑定时，作为 key 函数的返回值
+    d._children = d.children; // 将每个节点的子树（如果有）存放到属性 _children 中，然后选择性地将 children 属性为 null 来实现子树的隐藏（但仍保留该属性，以区分是否为叶子节点）
+    // !!!由于 d.children 是对象，所以复制操作实际是引用，因此后面对子树展开后，也会影响到 d._children
+    if (d.depth >= 1) d.children = null; // 为了演示，当节点不是根节点，且节点文本长度不为 7 时，隐藏其子树
+  });
+  console.log(root);
 
+  /**
+   * 预设参数和构建 svg 相关元素的容器
+   */
+  // const width = document.documentElement.clientWidth; // <svg> 元素的固定宽度
+  // const height = document.documentElement.clientHeight * 0.3;
+  const width = 800; // <svg> 元素的固定宽度
+  const height = 600;
 
-    // ！！！这一步修改树的结构，因此初始化的树并不是一棵完整的树
-    root.descendants().forEach((d, i) => {
-      d.id = i; // 将数列的索引设置为节点的 id 属性，作为各节点添加唯一标识值，在后面将节点数据与 DOM 元素绑定时，作为 key 函数的返回值
-      d._children = d.children; // 将每个节点的子树（如果有）存放到属性 _children 中，然后选择性地将 children 属性为 null 来实现子树的隐藏（但仍保留该属性，以区分是否为叶子节点）
-      if (d.depth >= 1) d.children = null; // 为了演示，当节点不是根节点，且节点文本长度不为 7 时，隐藏其子树
-    });
-    console.log(root);
+  // 设置树布局的节点尺寸
+  const dx = 20; // 固定垂直宽度
+  const dy = width / 4; // 固定水平宽度，基于 svg 宽度计算得到
 
-    /**
-     * 预设参数和构建 svg 相关元素的容器
-     */
-    // const width = document.documentElement.clientWidth; // <svg> 元素的固定宽度
-    // const height = document.documentElement.clientHeight * 0.3;
-    const width = 800; // <svg> 元素的固定宽度
-    const height = 600;
+  // 创建 svg 元素，设置合适的视窗 viewBox 大小
+  const svg = d3.create("svg")
+    .attr("viewBox", [-2 * dy, -height / 2, width, height]) // 设置水平和垂直偏移量，让树居中显示
+    .style("font", "14px sans-serif")
 
-    // 设置树布局的节点尺寸
-    const dx = 20; // 固定垂直宽度
-    const dy = width / 4; // 固定水平宽度，基于 svg 宽度计算得到
+  // 所有树图元素的容器 <g>
+  const container = svg.append("g")
+    .attr("class", "container")
+  // .attr('transform', `translate(${2 * dy}, ${height / 2})`)
 
-    // 创建 svg 元素，设置合适的视窗 viewBox 大小
-    const svg = d3.create("svg")
-      .attr("viewBox", [-dy, -height / 2, width, height]) // 设置水平和垂直偏移量，让树居中显示
-      .style("font", "14px sans-serif")
+  svg.append('circle')
+    .attr('cx', 0)
+    .attr('cy', 0)
+    .attr('r', 5)
+    .attr('fill', 'red')
 
-    // 所有树图元素的容器 <g>
-    const container = svg.append("g")
-      .attr("class", "container")
+  // 创建节点间连线的容器 <g>，并设置线条的样式
+  const gLink = container.append("g")
+    .attr("fill", "none")
+    .attr("stroke", "#555")
+    .attr("stroke-opacity", 0.4)
+    .attr("stroke-width", 1.5);
 
-    // 创建节点间连线的容器 <g>，并设置线条的样式
-    const gLink = container.append("g")
-      .attr("fill", "none")
-      .attr("stroke", "#555")
-      .attr("stroke-opacity", 0.4)
-      .attr("stroke-width", 1.5);
-
-    // 创建节点间连线的容器 <g>，并设置鼠标悬浮时的样式
-    const gNode = container.append("g")
-      .attr("cursor", "pointer")
-      .attr("pointer-events", "all");
+  // 创建节点间连线的容器 <g>，并设置鼠标悬浮时的样式
+  const gNode = container.append("g")
+    .attr("cursor", "pointer")
+    .attr("pointer-events", "all");
 
   /**
    * 响应用户操作（点击节点展开或搜索子树），重新计算数据的层次布局并渲染树图
    * 封装为一个函数便于不断调用（递归调用）
    */
   function update(source, duration = 250) {
-    const nodes = root.descendants().reverse(); // 返回包含树中所有节点的数组，并进行倒序?
+    const nodes = root.descendants(); // 返回包含树中所有节点的数组，并进行倒序?
     const links = root.links(); // 返回包含树中所有的节点配对关系的数组
     /**
     * 计算修改后的 root 的层次布局
@@ -88,19 +98,37 @@ d3.json('./data.json').then(data => {
 
 
 
-    // 为带有 children 属性的节点绑定点击事件，当用户点击节点时，切换 children 属性值（在 null 和预先设置的 _children 之间切换），！！！这会改变树的数据结构
+    // 为带有 children 属性的节点绑定点击事件，当用户点击节点时，切换 children 属性值（在 null 和预先设置的 _children 之间切换）
+    // !!!这会改变树的数据结构
     const hasChildrenNode = nodeEnter.filter((d) => {
       return d.data.children
     });
 
     hasChildrenNode.on("click", (event, d) => {
-      console.log(event.altKey);
+      // console.log(event.altKey);
       duration = event.altKey ? 1000 : 250; // 预设动画持续时间是 250ms，当按住 alt 键点击节点，动画持续更长时间
-      d.children = d.children ? null : d._children;
+      // d.children = d.children ? null : d._children;
+      // 切换 children 属性值（在 null 和预先设置的 _children 之间切换）
+      if (d.children) {
+        d.children = null;
+        adjustZoom(d.parent);
+      } else {
+        if (d.parent) {
+          d.parent.children.forEach(item => {
+            item.children = null;
+            update(item, duration)
+          })
+          d.children = d._children;
+        } else {
+          d.children = d._children;
+        }
+        adjustZoom(d);
+      }
       update(d, duration); // 然后调用 update() 函数，传递当前点击的节点作为 source，因此新增或移除的节点的「伸缩」起点或终点就是父节点
+
     });
 
-    console.log(hasChildrenNode);
+    // console.log(hasChildrenNode);
 
     // 为新增的节点添加圆形图标和文本
     nodeEnter.append("circle")
@@ -175,6 +203,7 @@ d3.json('./data.json').then(data => {
           .y(d => d.x)
           ({ source: o, target: o });
       });
+
   }
 
   update(root);
@@ -184,29 +213,82 @@ d3.json('./data.json').then(data => {
   d3.select("body").append(() => svg.node())
 
   /**
-   * 添加 svg 拖动和缩放功能
+   * 拖动和缩放功能
    */
-
+  /**
+   * 响应用户主动缩放和拖移操作
+   */
   const zoom = d3.zoom()
     .scaleExtent([0.5, 10]) // 设置缩放范围最小是原始大小，最大是 40 倍
     // 监听缩放事件（d3 将鼠标滚动和鼠标拖移、触控双指捏合、触控单指移动等多种事件整合，而且分为三种阶段：start、zoom、end。可以针对缩放事件的特定阶段进行监听）
-    .on("zoom", (event) => {
-      console.log(event);
-      zoomHandler(event) // 事件对象中 transform 属性包含了当前的缩放变换信息
-    })
+    .on("zoom", zoomHandler) // 默认将事件 event 对象作为参数传入
+
+
   // 如果需要针对特定的缩放操作作出特定的响应，可以在之后设置特定的事件侦听，如 on("dblclick.zoom", null) 取消双击事件的侦听（默认双击放大）
 
+  // zoom 事件的回调函数，对 <g class="container"> 元素进行缩放和拖移变换
+  // 其中变换参数在事件 event 对象的 transform 属性中，它是一个对象，包含了当前的缩放变换信息（x、y、k）
   function zoomHandler(event) {
-    console.log(container.node());
-    console.log(`translate(${event.transform.x}, ${event.transform.y}) scale(${event.transform.k})`);
+    // console.log(event);
+    let { x, y, k } = event.transform
+    // 解构事件 event 获取 transform 参数
     // 通过 CSS 将变换应用到 HTML 元素
     // 注意变换的顺序，平移一定要在缩放前
-    container.attr(
-      "transform",
-      `translate(${event.transform.x}, ${event.transform.y}) scale(${event.transform.k})`);
+    // 直接将 transform 对象作为属性值，它会调用其方法.toString() 返回一个能直接被 SVG transform 识别的表示变换的字符串
+    // container.attr("transform", transform);
+    // if(type === 'mousemove') {
+    //   container.attr("transform", `translate(${x}, ${y} scale(${k})`);
+    // } else if( type === 'wheel') {
+
+    //   container.attr("transform", `translate(${x}, ${y}) scale(${k})`)
+    // }
+    container.attr("transform", `translate(${x}, ${y}) scale(${k})`);
   }
 
-  // 一般采用 <svg><g class="container"></g></svg> 结构，方便为整个 svg 添加 zoom 事件侦听，然后对内部的 <g> 元素进行缩放和拖移操作（更新 transform 状态），这样避免可能发生抖动的情况。
-  svg.call(zoom); // 使用 selection.call(zoom) 为特定的选择集应用预设的缩放行为
+  // 一般将 zoom 事件侦听添加到整个 <svg> 元素上，然后对内部的 <g> 元素进行缩放和拖移操作（更新 transform 状态），这样避免可能发生抖动的情况。
+  // 所以 DOM 一般采用 <svg><g class="container"></g></svg> 结构
+  // 使用 selection.call(zoom) 为特定的选择集应用预设的缩放行为
+  svg.call(zoom)
+
+  /**
+   * 「伸缩」子树时调整画面布局
+   */
+  // 获取最多的子节点数
+  // 以上 svg.call(zoom) 使用监听用户触发的 zoom 事件默认直接生成的 event.transform 来执行变换，此外还可以使用 zoom.transform 函数来设置自定义的变换方式，覆盖替换 event.transform 的值，再传递给回调函数，对 <g class="container"> 元素执行指定的变换
+  function adjustZoom(d) {
+    /**
+    * 点击节点如果展开子树，则节点移动到垂直居中位置
+    * 点击节点如果收缩节点，其上一级父节点移动到垂直居中位置
+    */
+    let { x, y, children } = d;
+    let scale = 1;
+    if (children) {
+      // 基于子树的节点个数相应地缩放容器 <g class="container">
+      scale = height / ((children.length + 2) * dx);
+      if (scale > 1) {
+        scale = 1
+      }
+    }
+
+    svg.transition()
+      .duration(250)
+      .call(
+        zoom.transform,
+        d3.zoomIdentity.scale(scale).translate(-y, -x)
+        // d3.zoomIdentity 表示坐标 [0, 0] 缩放为 1 的状态，因此基于该状态进行变换就可以恢复原始变换位置
+      )
+  }
+  function scale(node) {
+    let scale = 1;
+    if (root.children) {
+      node.children.forEach(d => {
+        var tmpDepth = getDepth(d);
+        if (tmpDepth > depth) {
+          depth = tmpDepth;
+        }
+      });
+    }
+    return scale
+  }
 
 });
