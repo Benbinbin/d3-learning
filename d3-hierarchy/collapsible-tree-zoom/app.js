@@ -105,15 +105,14 @@ d3.json('./data.json').then(data => {
     });
 
     hasChildrenNode.on("click", (event, d) => {
+      if (!d.parent) return // 判断 d 是否为 root，限制根节点不可进行子树的「伸缩」操作
       // console.log(event.altKey);
       duration = event.altKey ? 1000 : 250; // 预设动画持续时间是 250ms，当按住 alt 键点击节点，动画持续更长时间
       // 切换 children 属性值（在 null 和预先设置的 _children 之间切换）
       d.children = d.children ? null : d._children;
-      update(d, duration); // 然后调用 update() 函数，传递当前点击的节点作为 source，因此新增或移除的节点的「伸缩」起点或终点就是父节点
 
-      let isRoot = d.parent ? false : true;// 判断 d 是否为 root;
-      if (d.children && !isRoot) {
-        // 展开子树的情况
+      if (d.children) {
+        // 展开子树
         d.parent.children.forEach(item => {
           if (item !== d) {
             // 判断是否为非点击节点，收起同层其他节点下的子树
@@ -121,15 +120,12 @@ d3.json('./data.json').then(data => {
             update(item, duration)
           }
         })
-        adjustZoom(d, isRoot, true)
-      } else if (d.children && isRoot) {
-        // 根节点展开子树的情况
-        adjustZoom(d, isRoot, true)
-      } else if (!d.children) {
-        // 收缩子树的情况
-        adjustZoom(d, isRoot, false)
+        adjustZoom(d, true)
+      } else {
+        // 收缩子树
+        adjustZoom(d, false)
       }
-
+      update(d, duration); // 然后调用 update() 函数，传递当前点击的节点作为 source，因此新增或移除的节点的「伸缩」起点或终点就是父节点
 
     });
 
@@ -154,16 +150,16 @@ d3.json('./data.json').then(data => {
 
     // 将新增的节点移到层次布局计算得到的坐标上，使用前面预设的动效（同时响应式变更 svg 的 viewBox 高度）
     node.merge(nodeEnter)
-      .transition()
-      .duration(duration)
+      // .transition()
+      // .duration(duration)
       .attr("transform", d => `translate(${d.y},${d.x})`)
       .attr("fill-opacity", 1)
       .attr("stroke-opacity", 1);
 
     // 从页面上移除 exiting 结点集合（未绑定数据的旧 DOM 元素），使用前面预设的动效，节点缩回父节点处
     node.exit()
-      .transition()
-      .duration(duration)
+      // .transition()
+      // .duration(duration)
       .remove()
       .attr("transform", d => `translate(${source.y},${source.x})`)
       .attr("fill-opacity", 0)
@@ -190,16 +186,16 @@ d3.json('./data.json').then(data => {
 
     // 将新增的连线根据基于「真实」的节点位置重新生成曲线，使用前面预设的动效（同时响应式变更 svg 的 viewBox 高度）
     link.merge(linkEnter)
-      .transition()
-      .duration(duration)
+      // .transition()
+      // .duration(duration)
       .attr("d", d3.linkHorizontal()
         .x(d => d.y)
         .y(d => d.x));
 
     // 从页面上移除 exiting 结点集合，使用前面预设的动效，节点缩回父节点处
     link.exit()
-      .transition()
-      .duration(duration)
+      // .transition()
+      // .duration(duration)
       .remove()
       .attr("d", d => {
         const o = { x: source.x, y: source.y };
@@ -260,7 +256,7 @@ d3.json('./data.json').then(data => {
    */
   // 获取最多的子节点数
   // 以上 svg.call(zoom) 使用监听用户触发的 zoom 事件默认直接生成的 event.transform 来执行变换，此外还可以使用 zoom.transform 函数来设置自定义的变换方式，覆盖替换 event.transform 的值，再传递给回调函数，对 <g class="container"> 元素执行指定的变换
-  function adjustZoom(d, isRoot, isExpand) {
+  function adjustZoom(d, isExpand) {
     /**
     * 点击节点如果展开子树，则节点移动到垂直居中位置
     * 点击节点如果收缩节点，其上一级父节点移动到垂直居中位置
@@ -272,19 +268,15 @@ d3.json('./data.json').then(data => {
       scale = height / ((d.children.length + 2) * dx); // 基于子树的节点个数相应地缩放容器 <g class="container">
       x = d.y;
       y = d.x;
-    } else if (!isRoot && !isExpand) {
+    } else {
       //  收缩子树
       scale = height / ((d.parent.children.length + 2) * dx); // 基于同层的节点个数相应地缩放容器 <g class="container">
       x = d.parent.y;
       y = d.parent.x;
-    } else if (isRoot && !isExpand) {
-      //  收缩根节点
-      x = d.y;
-      y = d.x;
     }
 
-    if (scale >= 1) {
-      scale = 1
+    if (scale > 1) {
+      scale = 1;
     }
 
     svg.transition()
