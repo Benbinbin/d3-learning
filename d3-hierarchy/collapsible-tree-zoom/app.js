@@ -107,24 +107,29 @@ d3.json('./data.json').then(data => {
     hasChildrenNode.on("click", (event, d) => {
       // console.log(event.altKey);
       duration = event.altKey ? 1000 : 250; // 预设动画持续时间是 250ms，当按住 alt 键点击节点，动画持续更长时间
-      // d.children = d.children ? null : d._children;
       // 切换 children 属性值（在 null 和预先设置的 _children 之间切换）
-      if (d.children) {
-        d.children = null;
-        adjustZoom(d.parent);
-      } else {
-        if (d.parent) {
-          d.parent.children.forEach(item => {
+      d.children = d.children ? null : d._children;
+      update(d, duration); // 然后调用 update() 函数，传递当前点击的节点作为 source，因此新增或移除的节点的「伸缩」起点或终点就是父节点
+
+      let isRoot = d.parent ? false : true;// 判断 d 是否为 root;
+      if (d.children && !isRoot) {
+        // 展开子树的情况
+        d.parent.children.forEach(item => {
+          if (item !== d) {
+            // 判断是否为非点击节点，收起同层其他节点下的子树
             item.children = null;
             update(item, duration)
-          })
-          d.children = d._children;
-        } else {
-          d.children = d._children;
-        }
-        adjustZoom(d);
+          }
+        })
+        adjustZoom(d, isRoot, true)
+      } else if (d.children && isRoot) {
+        // 根节点展开子树的情况
+        adjustZoom(d, isRoot, true)
+      } else if (!d.children) {
+        // 收缩子树的情况
+        adjustZoom(d, isRoot, false)
       }
-      update(d, duration); // 然后调用 update() 函数，传递当前点击的节点作为 source，因此新增或移除的节点的「伸缩」起点或终点就是父节点
+
 
     });
 
@@ -255,26 +260,38 @@ d3.json('./data.json').then(data => {
    */
   // 获取最多的子节点数
   // 以上 svg.call(zoom) 使用监听用户触发的 zoom 事件默认直接生成的 event.transform 来执行变换，此外还可以使用 zoom.transform 函数来设置自定义的变换方式，覆盖替换 event.transform 的值，再传递给回调函数，对 <g class="container"> 元素执行指定的变换
-  function adjustZoom(d) {
+  function adjustZoom(d, isRoot, isExpand) {
     /**
     * 点击节点如果展开子树，则节点移动到垂直居中位置
     * 点击节点如果收缩节点，其上一级父节点移动到垂直居中位置
     */
-    let { x, y, children } = d;
     let scale = 1;
-    if (children) {
-      // 基于子树的节点个数相应地缩放容器 <g class="container">
-      scale = height / ((children.length + 2) * dx);
-      if (scale > 1) {
-        scale = 1
-      }
+    let x, y;
+    if (isExpand) {
+      // 展开子树
+      scale = height / ((d.children.length + 2) * dx); // 基于子树的节点个数相应地缩放容器 <g class="container">
+      x = d.y;
+      y = d.x;
+    } else if (!isRoot && !isExpand) {
+      //  收缩子树
+      scale = height / ((d.parent.children.length + 2) * dx); // 基于同层的节点个数相应地缩放容器 <g class="container">
+      x = d.parent.y;
+      y = d.parent.x;
+    } else if (isRoot && !isExpand) {
+      //  收缩根节点
+      x = d.y;
+      y = d.x;
+    }
+
+    if (scale >= 1) {
+      scale = 1
     }
 
     svg.transition()
       .duration(250)
       .call(
         zoom.transform,
-        d3.zoomIdentity.scale(scale).translate(-y, -x)
+        d3.zoomIdentity.translate(-x, -y).scale(scale)
         // d3.zoomIdentity 表示坐标 [0, 0] 缩放为 1 的状态，因此基于该状态进行变换就可以恢复原始变换位置
       )
   }
