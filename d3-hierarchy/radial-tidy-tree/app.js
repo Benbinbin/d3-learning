@@ -13,13 +13,6 @@ d3.json('data.json').then(data => {
   const width = document.documentElement.clientWidth; // <svg> 元素的固定宽度
   const height = document.documentElement.clientHeight // <svg> 元素的固定高度
   // 创建 svg 元素，设置合适的视窗 viewBox 大小
-  const margin = {
-    top: 50,
-    right: 50,
-    bottom: 50,
-    left: 50
-  };
-
   const svg = d3.create("svg")
     .style("font", "12px sans-serif")
     .attr("viewBox", [-width / 2, -height / 2, width, height])
