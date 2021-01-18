@@ -76,7 +76,7 @@ const link = g.append("g")
   // 使用 d3.linkHorizontal() 方法生成曲线（源点到目标点的光滑的三次贝塞尔曲线），终点和起点处的切线是水平方向的
   // 指定
   .attr("d", d3.linkHorizontal()
-    .x(d => d.y) // 由于树图是水平方向，需要调用 link 生成器的方法 .x() 调换 x 和 y 值
+    .x(d => d.y) // 由于树图是水平方向，需要调用 link 生成器的方法 .x() 和 .y() 调换 x 和 y 值
     .y(d => d.x));
 
 console.log(root.links());

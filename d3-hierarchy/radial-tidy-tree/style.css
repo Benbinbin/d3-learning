@@ -1,0 +1,13 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+svg {
+  display: block;
+  margin: 50px auto;
+  width: 90vw;
+  height: 90vh;
+  border: 2px solid orange;
+}

@@ -280,7 +280,7 @@ d3.json('./data.json').then(data => {
     }
 
     svg.transition()
-      .duration(250)
+      .duration(500)
       .call(
         zoom.transform,
         d3.zoomIdentity.translate(-x, -y).scale(scale)
