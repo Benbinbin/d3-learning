@@ -1,5 +1,3 @@
-// 设置布局的节点尺寸，由于渲染的是水平布局树图，在设置坐标或宽高是部分函数在传递参数值时可能需要对调
-
 d3.json('data.json').then(data => {
   /**
   * 结构化数据
@@ -20,9 +18,12 @@ d3.json('data.json').then(data => {
     .attr("viewBox", [-width / 2, -height / 2, width, height])
 
   const container = svg.append('g')
-    // .attr("transform", "scale(0.8)")
+  // .attr("transform", "scale(0.8)")
 
   // 预设颜色数组
+  // 使用 d3 scale-chromatic 模块的 interpolateRainbow() 方法作为颜色插值函数
+  // 使用 d3 interpolate 模块的 quantize() 方法根据指定的 interpolator 插值函数，返回 n 个等间隔的均匀采样
+  // 使用 d3 scale 模块的 scaleOrdinal() 方法创建一个序数比例尺，输入域就是采用生成的一系列颜色，然后使用该比例尺将不同的（根节点后的直接）子节点映射到不同的颜色
   color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1))
 
   // 设置径向树布局参数
@@ -37,10 +38,10 @@ d3.json('data.json').then(data => {
   tree = d3.partition()
     .size([2 * Math.PI, radius])(root); // 旭日图是环形，采用角度坐标 [360, radius]
   // 对指定的结构数据计算分区层次布局，每个节点会被附加以下属性:
-  // node.x0 - 矩形的左边缘
-  // node.y0 - 矩形的上边缘
-  // node.x1 - 矩形的右边缘
-  // node.y1 - 矩形的下边缘
+  // node.x0 - 环形的左边的偏移角度
+  // node.y0 - 环形的内边缘
+  // node.x1 - 环形的右边的偏移角度
+  // node.y1 - 环形的外边缘
 
   /**
    * 绘制旭日图
@@ -63,8 +64,8 @@ d3.json('data.json').then(data => {
     // 将数据与 <path> 元素进行绑定
     .data(tree.descendants().filter(d => d.depth)) // 移除 depth = 0 的节点，即根节点
     .join("path")
-    .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.name); })
-    .attr("d", arc) // 基于数据得到环形路径
+    .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.name); }) // 不断循环回溯查看当前节点所属哪个根节点的直接子节点，并返回对应的颜色值
+    .attr("d", arc) // 基于分区层次布局数据得到环形路径
     // svg 中的 <title> 元素是可以在鼠标悬浮在其父元素时显示的内容
     .append("title")
     .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}`); // 显示的内容是当前节点对应的祖先节点「路径」
