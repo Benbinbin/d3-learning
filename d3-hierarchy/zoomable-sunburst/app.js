@@ -208,7 +208,7 @@ d3.json('data.json').then(data => {
     .style("cursor", "pointer")
     .attr("pointer-events", "all")
     .attr("d", d => centerArc(tree)(d)) // 默认以根节点为当前节点，使用函数 centerArc() 生成中心的环形路径
-    .attr('filter', 'url(#shadow)')
+    // .attr('filter', 'url(#shadow)')
     .on("click", clicked);
 
   // 绘制中心圆环的文本
@@ -243,7 +243,7 @@ d3.json('data.json').then(data => {
   function clicked(event, p) {
     // parent.datum(p.parent || tree); // 更新旭日图中心圆绑定的数据，绑定点击节点的父节点的数据（如果点击的节点已经是根节点就绑定根节点对应的数据，由于根节点 parent 为 null）
 
-    const t = d3.transition().duration(2000); // 设置过渡时间
+    const t = d3.transition().duration(500); // 设置过渡时间
 
     /**
      * 更新外圆环
