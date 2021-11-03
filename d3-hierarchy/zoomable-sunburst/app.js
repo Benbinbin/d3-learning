@@ -305,7 +305,7 @@ d3.json('data.json').then(data => {
           // 设置为根节点为白色
           return 'rgb(255, 255, 255)'
         } else {
-          console.log(centerColor(p)[i]);
+          // console.log(centerColor(p)[i]);
           return centerColor(p)[i]
         }
       })
