@@ -5,94 +5,113 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Learning D3.js</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 
 <body>
-  <div class="container">
-    <h1 class="text-center fw-bold m-5">Learning D3.js Line By Line</h1>
-    <p class="fw-light text-center">通过阅读<a href="https://observablehq.com/@d3" target="_blank" style="text-decoration: none;">官方样例</a>的每一行代码并复现样例学习 D3.js。</p>
-    <div id="main">
-      <section v-for="item of content">
-        <h2 class="my-4">
-          <span class="border-bottom border-5 border-primary"><a :href=`https://github.com/d3/${item.module}` target="_blank" style="text-decoration: none;color: black">{{ item.module }}</a></span>
-        </h2>
-        <div class="row g-4">
-          <div class="col-12 col-md-6 col-lg-4" v-for="example of item.examples">
-            <div class="card h-100">
-              <div class="card-body">
-                <h3 class="card-title fw-bold">{{ example.name }}</h3>
-                <p class="card-text">{{ example.description }}</p>
-              </div>
-              <div class="card-footer">
-                <a class="btn btn-outline-primary" :href='example.source' role="button"
-                  target="_blank">官方样例</a>
-                <a class="btn btn-outline-success" :href=`./d3-hierarchy/${example.folder}/index.html` role="button"
-                  target="_blank">演示</a>
-                <a class="btn btn-outline-primary"
-                  :href=`https://github.com/Benbinbin/d3-learning/blob/main/d3-hierarchy/${example.folder}/app.js`
-                  role="button" target="_blank">核心代码</a>
-              </div>
-            </div>
+  <h1 class="my-8 text-center text-3xl font-bold">Learning <span class="text-orange-400">D3.js</span> <span class="text-purple-500">Line-by-Line</span></h1>
+  <p class="text-center text-sm font-light">通过阅读<a href="https://observablehq.com/@d3" target="_blank" style="text-decoration: none;">官方样例</a>的每一行代码并复现样例学习 D3.js。</p>
+
+  <div id="app" class="w-full p-4 sm:p-16 flex flex-col justify-center items-center gap-8">
+    <section v-for="item of content" class="container">
+      <!-- chart type -->
+      <h2 class="my-6 text-2xl font-bold">
+        <span class="underline underline-offset-8 decoration-4 decoration-blue-500">{{ item.themeTitle || item.theme }}</span>
+      </h2>
+      <!-- example list -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="flex flex-col border rounded-md" v-for="example of item.examples" :key="example.folder">
+          <div class="grow p-4">
+            <!-- chart title -->
+            <h3 class="pb-4 text-xl font-bold">{{ example.name }}</h3>
+            <!-- chart description -->
+            <p class="text-base text-gray-600">{{ example.description }}</p>
+          </div>
+          <div class="shrink-0 p-4 flex flex-wrap justify-start items-center gap-2 text-xs font-bold bg-gray-50 border-t rounded-b-md">
+            <!-- reference of D3 example from Observable -->
+            <a v-if="example.reference" class="px-2.5 py-1.5 text-blue-600 hover:text-white bg-blue-100 hover:bg-blue-500 border border-blue-500 rounded transition-colors duration-300" :href='example.reference'
+              target="_blank">参考</a>
+            <a v-if="example.folder" class="px-2.5 py-1.5 text-green-600 hover:text-white bg-green-100 hover:bg-green-500 border border-green-500 rounded transition-colors duration-300" :href=`./${item.theme}/${example.folder}/index.html` target="_blank">演示</a>
+            <a v-if="example.folder" class="px-2.5 py-1.5 text-gray-600 hover:text-white bg-gray-200 hover:bg-gray-500 border border-gray-500 rounded transition-colors duration-300"
+              :href=`https://github.com/Benbinbin/d3-learning/tree/main/${item.theme}/${example.folder}/`
+              target="_blank">代码</a>
+            <a v-if="example.note" class="px-2.5 py-1.5 text-purple-600 hover:text-white bg-purple-100 hover:bg-purple-500 border border-purple-500 rounded transition-colors duration-300"
+              :href="example.note"
+              target="_blank">笔记</a>
           </div>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   </div>
   <script>
-    new Vue({
-      el: '#main',
-      data: {
-        content: [
-          {
-            module: 'd3-hierarchy',
-            examples: [
-              {
-                name: 'Tidy Tree',
-                description: '紧凑型的树图 tree diagram。',
-                source: 'https://observablehq.com/@d3/tidy-tree',
-                folder: 'static-tree-diagram',
-              },
-              {
-                name: 'Collapsible Tree',
-                description: '可交互（子树可伸缩）的树图 tree diagram。',
-                source: 'https://observablehq.com/@d3/collapsible-tree',
-                folder: 'collapsible-tree',
-              },
-              {
-                name: 'Collapsible Tree Zoom',
-                description: '可交互（子树可伸缩，树图整体可缩放移动）的树图 tree diagram。',
-                source: 'https://observablehq.com/@d3/collapsible-tree',
-                folder: 'collapsible-tree-zoom',
-              },
-              {
-                name: 'Radial Tidy Tree',
-                description: '径向树图 tree diagram。',
-                source: 'https://observablehq.com/@d3/radial-tidy-tree',
-                folder: 'radial-tidy-tree',
-              },
-              {
-                name: 'Sunburst Chart',
-                description: '旭日图 Sunburst Chart。',
-                source: 'https://observablehq.com/@d3/sunburst',
-                folder: 'sunburst',
-              },
-              {
-                name: 'Zoomable Sunburst',
-                description: '可下钻的旭日图。',
-                source: 'https://observablehq.com/@d3/zoomable-sunburst',
-                folder: 'zoomable-sunburst',
-              },
-            ]
-          }
-        ]
-      }
-    })
+  const { createApp } = Vue
+  createApp({
+    setup() {
+      const content = [
+        {
+          theme: 'hierarchy',
+          themeTitle: '结构化数据可视化',
+          examples: [
+            {
+              name: 'Tidy Tree',
+              description: '紧凑型的树图 tree diagram。',
+              reference: 'https://observablehq.com/@d3/tidy-tree',
+              folder: 'static-tree-diagram',
+            },
+            {
+              name: 'Collapsible Tree',
+              description: '可交互（子树可伸缩）的树图 tree diagram。',
+              reference: 'https://observablehq.com/@d3/collapsible-tree',
+              folder: 'collapsible-tree',
+            },
+            {
+              name: 'Collapsible Tree Zoom',
+              description: '可交互（子树可伸缩，树图整体可缩放移动）的树图 tree diagram。',
+              reference: 'https://observablehq.com/@d3/collapsible-tree',
+              folder: 'collapsible-tree-zoom',
+            },
+            {
+              name: 'Radial Tidy Tree',
+              description: '径向树图 tree diagram。',
+              reference: 'https://observablehq.com/@d3/radial-tidy-tree',
+              folder: 'radial-tidy-tree',
+            },
+            {
+              name: '旭日图',
+              description: '静态旭日图 Sunburst Chart',
+              reference: 'https://observablehq.com/@d3/sunburst',
+              folder: 'sunburst',
+            },
+            {
+              name: 'Zoomable Sunburst',
+              description: '可下钻的旭日图。',
+              reference: 'https://observablehq.com/@d3/zoomable-sunburst',
+              folder: 'zoomable-sunburst',
+            },
+          ]
+        },
+        {
+          theme: 'scatterplot',
+          themeTitle: '散点图',
+          examples: [
+            {
+              name: '静态散点图',
+              description: '静态（宽高固定）的散点图',
+              reference: 'https://observablehq.com/@benbinbin/scatterplot',
+              folder: 'static-scatterplot',
+              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#静态图'
+            }
+          ]
+        }
+      ]
+
+      // 返回值会暴露给模板和其他的选项式 API 钩子
+      return {
+          content
+        }
+    }
+  }).mount('#app')
   </script>
 </body>
 
