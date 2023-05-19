@@ -5,11 +5,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Static Tree Diagram</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3@6.3.1/dist/d3.js"></script>
+  <style>
+    svg {
+      border: 1px solid orange;
+    }
+  </style>
 </head>
 
 <body>
-
+  <div class="mx-auto my-6 text-center">
+    <h1 class="py-8 text-2xl font-bold">Static Tree Diagram</h1>
+    <p>紧凑型的树图 tree diagram</p>
+    <div class="py-2 text-sm flex flex-wrap justify-center items-center gap-4">
+      <a href="../../index.html" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">首页</a>
+      <a href="https://observablehq.com/@d3/tree" target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">参考</a>
+      <a href="https://github.com/Benbinbin/d3-learning/tree/main/hierarchy/static-tree-diagram/" target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">代码</a>
+    </div>
+  </div>
   <script src="app.js"></script>
 </body>
 

@@ -5,12 +5,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zoomable Sunburst</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/d3@6.3.1/dist/d3.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    svg {
+      border: 2px solid orange;
+      max-width: 90vw;
+      max-height: 90vh;
+      display: block;
+      margin: 50px auto;
+    }
+  </style>
 </head>
 
 <body>
-
+  <div class="mx-auto my-6 text-center">
+    <h1 class="py-8 text-2xl font-bold">Zoomable Sunburst</h1>
+    <p>可下钻的旭日图</p>
+    <div class="py-2 text-sm flex flex-wrap justify-center items-center gap-4">
+      <a href="../../index.html" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">首页</a>
+      <a href="https://observablehq.com/@d3/zoomable-sunburst" target="_blank"
+        class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">参考</a>
+      <a href="https://github.com/Benbinbin/d3-learning/tree/main/hierarchy/zoomable-sunburst/" target="_blank"
+        class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">代码</a>
+    </div>
+  </div>
   <script src="app.js"></script>
 </body>
 

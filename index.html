@@ -10,21 +10,21 @@
 </head>
 
 <body>
-  <h1 class="my-8 text-center text-3xl font-bold">Learning <span class="text-orange-400">D3.js</span> <span class="text-purple-500">Line-by-Line</span></h1>
-  <p class="text-center text-sm font-light">通过阅读<a href="https://observablehq.com/@d3" target="_blank" style="text-decoration: none;">官方样例</a>的每一行代码并复现样例学习 D3.js。</p>
+  <h1 class="my-8 text-center text-3xl font-bold"><span class="text-blue-500">Learning</span> <span class="text-orange-400">D3.js</span> <span class="text-purple-500">Line-by-Line</span></h1>
+  <p class="text-center text-sm font-light">通过阅读<a href="https://observablehq.com/@d3" target="_blank" class="text-blue-400 hover:text-blue-500 transition-colors duration-300">官方样例</a>的每一行代码并复现来学习 D3.js</p>
 
   <div id="app" class="w-full p-4 sm:p-16 flex flex-col justify-center items-center gap-8">
     <section v-for="item of content" class="container">
       <!-- chart type -->
-      <h2 class="my-6 text-2xl font-bold">
-        <span class="underline underline-offset-8 decoration-4 decoration-blue-500">{{ item.themeTitle || item.theme }}</span>
+      <h2 class="my-6">
+        <span class="text-2xl font-bold text-gray-800 underline underline-offset-8 decoration-4 decoration-gray-600">{{ item.themeTitle || item.theme }}</span>
       </h2>
       <!-- example list -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="flex flex-col border rounded-md" v-for="example of item.examples" :key="example.folder">
           <div class="grow p-4">
             <!-- chart title -->
-            <h3 class="pb-4 text-xl font-bold">{{ example.name }}</h3>
+            <h3 class="pb-4 text-xl font-bold text-gray-700">{{ example.name }}</h3>
             <!-- chart description -->
             <p class="text-base text-gray-600">{{ example.description }}</p>
           </div>
