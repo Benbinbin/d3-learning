@@ -4,23 +4,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <title>Learning D3.js</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    ::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      background-color: rgba(156, 163, 175, 1);
+      border: 3px solid transparent;
+      background-clip: padding-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(107, 114, 128, 1);
+    }
+
+    html {
+      scrollbar-gutter: stable
+    }
+  </style>
 </head>
 
 <body>
-  <h1 class="my-8 text-center text-3xl font-bold"><span class="text-blue-500">Learning</span> <span class="text-orange-400">D3.js</span> <span class="text-purple-500">Line-by-Line</span></h1>
-  <p class="text-center text-sm font-light">通过阅读<a href="https://observablehq.com/@d3" target="_blank" class="text-blue-400 hover:text-blue-500 transition-colors duration-300">官方样例</a>的每一行代码并复现来学习 D3.js</p>
+  <h1 class="my-8 text-center text-3xl font-bold"><span class="text-blue-500">Learning</span> <span
+      class="text-orange-400">D3.js</span> <span class="text-purple-500">Line-by-Line</span></h1>
+  <p class="text-center text-sm font-light">通过阅读<a href="https://observablehq.com/@d3" target="_blank"
+      class="text-blue-400 hover:text-blue-500 transition-colors duration-300">官方样例</a>的每一行代码并复现来学习 D3.js</p>
 
   <div id="app" class="w-full p-4 sm:p-16 flex flex-col justify-center items-center gap-8">
     <section v-for="item of content" class="container">
       <!-- chart type -->
       <h2 class="my-6">
-        <span class="text-2xl font-bold text-gray-800 underline underline-offset-8 decoration-4 decoration-gray-600">{{ item.themeTitle || item.theme }}</span>
+        <button class="p-2 text-2xl font-bold text-gray-800  border-l-4 border-gray-500 rounded-l-sm rounded-r transition-colors duration-300"
+        :class="collapsedThemeArr.has(item.theme) ? 'bg-gray-300 hover:bg-gray-200' : 'hover:bg-gray-300'"
+        @click="toggleTheme(item.theme)"
+        >{{
+          item.themeTitle || item.theme }}</button>
       </h2>
       <!-- example list -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div v-show="!collapsedThemeArr.has(item.theme)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="flex flex-col border rounded-md" v-for="example of item.examples" :key="example.folder">
           <div class="grow p-4">
             <!-- chart title -->
@@ -28,152 +56,169 @@
             <!-- chart description -->
             <p class="text-base text-gray-600">{{ example.description }}</p>
           </div>
-          <div class="shrink-0 p-4 flex flex-wrap justify-start items-center gap-2 text-xs font-bold bg-gray-50 border-t rounded-b-md">
+          <div
+            class="shrink-0 p-4 flex flex-wrap justify-start items-center gap-2 text-xs font-bold bg-gray-50 border-t rounded-b-md">
             <!-- reference of D3 example from Observable -->
-            <a v-if="example.reference" class="px-2.5 py-1.5 text-blue-600 hover:text-white bg-blue-100 hover:bg-blue-500 border border-blue-500 rounded transition-colors duration-300" :href='example.reference'
-              target="_blank">参考</a>
-            <a v-if="example.folder" class="px-2.5 py-1.5 text-green-600 hover:text-white bg-green-100 hover:bg-green-500 border border-green-500 rounded transition-colors duration-300" :href=`./${item.theme}/${example.folder}/index.html` target="_blank">演示</a>
-            <a v-if="example.folder" class="px-2.5 py-1.5 text-gray-600 hover:text-white bg-gray-200 hover:bg-gray-500 border border-gray-500 rounded transition-colors duration-300"
+            <a v-if="example.reference"
+              class="px-2.5 py-1.5 text-blue-600 hover:text-white bg-blue-100 hover:bg-blue-500 border border-blue-500 rounded transition-colors duration-300"
+              :href='example.reference' target="_blank">参考</a>
+            <a v-if="example.folder"
+              class="px-2.5 py-1.5 text-green-600 hover:text-white bg-green-100 hover:bg-green-500 border border-green-500 rounded transition-colors duration-300"
+              :href=`./${item.theme}/${example.folder}/index.html` target="_blank">演示</a>
+            <a v-if="example.folder"
+              class="px-2.5 py-1.5 text-gray-600 hover:text-white bg-gray-200 hover:bg-gray-500 border border-gray-500 rounded transition-colors duration-300"
               :href=`https://github.com/Benbinbin/d3-learning/tree/main/${item.theme}/${example.folder}/`
               target="_blank">代码</a>
-            <a v-if="example.note" class="px-2.5 py-1.5 text-purple-600 hover:text-white bg-purple-100 hover:bg-purple-500 border border-purple-500 rounded transition-colors duration-300"
-              :href="example.note"
-              target="_blank">笔记</a>
+            <a v-if="example.note"
+              class="px-2.5 py-1.5 text-purple-600 hover:text-white bg-purple-100 hover:bg-purple-500 border border-purple-500 rounded transition-colors duration-300"
+              :href="example.note" target="_blank">笔记</a>
           </div>
         </div>
       </div>
     </section>
   </div>
   <script>
-  const { createApp } = Vue
-  createApp({
-    setup() {
-      const content = [
-        {
-          theme: 'hierarchy',
-          themeTitle: '结构化数据可视化',
-          examples: [
-            {
-              name: 'Tidy Tree',
-              description: '紧凑型的树图 tree diagram。',
-              reference: 'https://observablehq.com/@d3/tidy-tree',
-              folder: 'static-tree-diagram',
-            },
-            {
-              name: 'Collapsible Tree',
-              description: '可交互（子树可伸缩）的树图 tree diagram。',
-              reference: 'https://observablehq.com/@d3/collapsible-tree',
-              folder: 'collapsible-tree',
-            },
-            {
-              name: 'Collapsible Tree Zoom',
-              description: '可交互（子树可伸缩，树图整体可缩放移动）的树图 tree diagram。',
-              reference: 'https://observablehq.com/@d3/collapsible-tree',
-              folder: 'collapsible-tree-zoom',
-            },
-            {
-              name: 'Radial Tidy Tree',
-              description: '径向树图 tree diagram。',
-              reference: 'https://observablehq.com/@d3/radial-tidy-tree',
-              folder: 'radial-tidy-tree',
-            },
-            {
-              name: '旭日图',
-              description: '静态旭日图 Sunburst Chart',
-              reference: 'https://observablehq.com/@d3/sunburst',
-              folder: 'sunburst',
-            },
-            {
-              name: 'Zoomable Sunburst',
-              description: '可下钻的旭日图。',
-              reference: 'https://observablehq.com/@d3/zoomable-sunburst',
-              folder: 'zoomable-sunburst',
-            },
-          ]
-        },
-        {
-          theme: 'scatterplot',
-          themeTitle: '散点图',
-          examples: [
-            {
-              name: '静态散点图',
-              description: '静态（宽高固定）的散点图',
-              reference: 'https://observablehq.com/@benbinbin/scatterplot',
-              folder: 'static-scatterplot',
-              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#静态图'
-            },
-            {
-              name: '响应式散点图 v1',
-              description: '响应式散点图方案一',
-              reference: 'https://observablehq.com/@benbinbin/scatterplot',
-              folder: 'responsive-scatterplot-version-1',
-              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#方案一'
-            },
-            {
-              name: '响应式散点图 v2',
-              description: '响应式散点图方案二',
-              reference: 'https://observablehq.com/@benbinbin/scatterplot',
-              folder: 'responsive-scatterplot-version-2',
-              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#方案二'
-            },
-            {
-              name: '交互式散点图-提示框',
-              reference: 'https://observablehq.com/@benbinbin/scatterplot',
-              folder: 'scatterplot-tooltip',
-              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#tooltip'
-            },
-            {
-              name: '交互散点图-辅助线',
-              reference: 'https://observablehq.com/@benbinbin/scatterplot',
-              folder: 'scatterplot-crosshair',
-              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#辅助线'
-            },
-            {
-              name: '交互散点图-高亮显示',
-              reference: 'https://observablehq.com/@benbinbin/scatterplot',
-              folder: 'scatterplot-highlight',
-              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#高亮显示'
-            },
-            {
-              name: '交互散点图-刷选',
-              reference: 'https://observablehq.com/@d3/brushable-scatterplot',
-              folder: 'scatterplot-brush',
-              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#刷选'
-            },
-            {
-              name: '交互散点图-缩放',
-              reference: 'https://observablehq.com/@d3/scatterplot-tour',
-              folder: 'scatterplot-zoom',
-              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#区域缩放'
-            },
-            {
-              name: '动效散点图-路径展开',
-              reference: 'https://observablehq.com/@d3/connected-scatterplot',
-              folder: 'scatterplot-connected',
-              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#路径展开'
-            },
-            {
-              name: '动效散点图-位置变动',
-              reference: 'https://observablehq.com/@mbostock/the-wealth-health-of-nations',
-              folder: 'scatterplot-move-animation',
-              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#位置变动'
-            },
-            {
-              name: '变体-散点图矩阵',
-              reference: 'https://observablehq.com/@d3/splom',
-              folder: 'scatterplot-matrix',
-              note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#散点图矩阵'
-            },
-          ]
-        }
-      ]
+    const { createApp, ref } = Vue
+    createApp({
+      setup() {
+        const content = [
+          {
+            theme: 'scatterplot',
+            themeTitle: '散点图',
+            examples: [
+              {
+                name: '静态散点图',
+                description: '静态（宽高固定）的散点图',
+                reference: 'https://observablehq.com/@benbinbin/scatterplot',
+                folder: 'static-scatterplot',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#静态图'
+              },
+              {
+                name: '响应式散点图 v1',
+                description: '响应式散点图方案一',
+                reference: 'https://observablehq.com/@benbinbin/scatterplot',
+                folder: 'responsive-scatterplot-version-1',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#方案一'
+              },
+              {
+                name: '响应式散点图 v2',
+                description: '响应式散点图方案二',
+                reference: 'https://observablehq.com/@benbinbin/scatterplot',
+                folder: 'responsive-scatterplot-version-2',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#方案二'
+              },
+              {
+                name: '交互式散点图-提示框',
+                reference: 'https://observablehq.com/@benbinbin/scatterplot',
+                folder: 'scatterplot-tooltip',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#tooltip'
+              },
+              {
+                name: '交互散点图-辅助线',
+                reference: 'https://observablehq.com/@benbinbin/scatterplot',
+                folder: 'scatterplot-crosshair',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#辅助线'
+              },
+              {
+                name: '交互散点图-高亮显示',
+                reference: 'https://observablehq.com/@benbinbin/scatterplot',
+                folder: 'scatterplot-highlight',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#高亮显示'
+              },
+              {
+                name: '交互散点图-刷选',
+                reference: 'https://observablehq.com/@d3/brushable-scatterplot',
+                folder: 'scatterplot-brush',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#刷选'
+              },
+              {
+                name: '交互散点图-缩放',
+                reference: 'https://observablehq.com/@d3/scatterplot-tour',
+                folder: 'scatterplot-zoom',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#区域缩放'
+              },
+              {
+                name: '动效散点图-路径展开',
+                reference: 'https://observablehq.com/@d3/connected-scatterplot',
+                folder: 'scatterplot-connected',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#路径展开'
+              },
+              {
+                name: '动效散点图-位置变动',
+                reference: 'https://observablehq.com/@mbostock/the-wealth-health-of-nations',
+                folder: 'scatterplot-move-animation',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#位置变动'
+              },
+              {
+                name: '变体-散点图矩阵',
+                reference: 'https://observablehq.com/@d3/splom',
+                folder: 'scatterplot-matrix',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-scatterplot#散点图矩阵'
+              },
+            ]
+          },
+          {
+            theme: 'hierarchy',
+            themeTitle: '结构化数据可视化',
+            examples: [
+              {
+                name: 'Tidy Tree',
+                description: '紧凑型的树图 tree diagram。',
+                reference: 'https://observablehq.com/@d3/tidy-tree',
+                folder: 'static-tree-diagram',
+              },
+              {
+                name: 'Collapsible Tree',
+                description: '可交互（子树可伸缩）的树图 tree diagram。',
+                reference: 'https://observablehq.com/@d3/collapsible-tree',
+                folder: 'collapsible-tree',
+              },
+              {
+                name: 'Collapsible Tree Zoom',
+                description: '可交互（子树可伸缩，树图整体可缩放移动）的树图 tree diagram。',
+                reference: 'https://observablehq.com/@d3/collapsible-tree',
+                folder: 'collapsible-tree-zoom',
+              },
+              {
+                name: 'Radial Tidy Tree',
+                description: '径向树图 tree diagram。',
+                reference: 'https://observablehq.com/@d3/radial-tidy-tree',
+                folder: 'radial-tidy-tree',
+              },
+              {
+                name: '旭日图',
+                description: '静态旭日图 Sunburst Chart',
+                reference: 'https://observablehq.com/@d3/sunburst',
+                folder: 'sunburst',
+              },
+              {
+                name: 'Zoomable Sunburst',
+                description: '可下钻的旭日图。',
+                reference: 'https://observablehq.com/@d3/zoomable-sunburst',
+                folder: 'zoomable-sunburst',
+              },
+            ]
+          },
+        ]
 
-      // 返回值会暴露给模板和其他的选项式 API 钩子
-      return {
-          content
+        const collapsedThemeArr = ref(new Set());
+
+        const toggleTheme = (theme) => {
+          console.log(collapsedThemeArr.value.has(theme))
+          if(collapsedThemeArr.value.has(theme)) {
+            collapsedThemeArr.value.delete(theme)
+          } else {
+            collapsedThemeArr.value.add(theme)
+          }
         }
-    }
-  }).mount('#app')
+
+        return {
+          content,
+          collapsedThemeArr,
+          toggleTheme
+        }
+      }
+    }).mount('#app')
   </script>
 </body>
 
