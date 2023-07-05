@@ -1,4 +1,4 @@
-// 参考自 https://observablehq.com/@d3/histogram/2?intent=fork
+// 参考自 https://observablehq.com/@d3/histogram/2
 
 /**
  *
@@ -36,7 +36,7 @@ const svg = d3
  * 再在回调函数中执行绘制操作
  *
  */
-// 数据来源网页 https://observablehq.com/@d3/histogram/2?intent=fork 的文件附件
+// 数据来源网页 https://observablehq.com/@d3/histogram/2 的文件附件
 const dataURL =
   "https://gist.githubusercontent.com/Benbinbin/6ac7c033ed93f39ec9fa77d79e234900/raw/9938e4b3fbde7ff68719582516a7216e9a07e83d/unemployment-x.csv";
 

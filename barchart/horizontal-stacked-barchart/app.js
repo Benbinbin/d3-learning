@@ -1,4 +1,9 @@
-// 参考自 https://observablehq.com/@d3/stacked-bar-chart/2
+/**
+ * 📢 由于 水平堆叠条形图 与 垂直堆叠条形图 相比，在代码上大部分都是相同的
+ * 相当于只是将横坐标轴和纵坐标轴相互调换
+ * 可以结合垂直堆叠条形图的代码 https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-bar-chart#堆叠条形图 对照着看
+ */
+// 参考自 https://observablehq.com/@d3/stacked-horizontal-bar-chart/2
 
 /**
  *
@@ -9,25 +14,14 @@ const container = document.getElementById("container"); // 图像的容器
 
 // 获取尺寸大小
 const width = container.clientWidth; // 宽度
-const height = container.clientHeight; // 高度
+// svg 元素的高度不再由页面的高度来决定
+// 在下面会基于条形图中条带的宽度和数量通过计算得出
+let height = 0;
 // margin 为前缀的产生是在外四边留白，构建一个显示的安全区，以便在四周显示坐标轴
 const marginTop = 20;
 const marginRight = 20;
 const marginBottom = 30;
 const marginLeft = 40;
-
-// 创建 svg
-// 在容器 <div id="container"> 元素内创建一个 SVG 元素
-// 主要使用 d3-selection 模块的 API
-// 具体可以参考 https://github.com/d3/d3-selection 或 https://d3js.org/d3-selection
-// 使用方法 d3.create("svg") 创建一个 svg 元素，并返回一个选择集 selection
-// 使用选择集的方法 selection.attr() 为选择集中的所有元素（即 <svg> 元素）设置宽高和 viewBox 属性
-const svg = d3
-  .select("#container")
-  .append("svg")
-  .attr("width", width)
-  .attr("height", height)
-  .attr("viewBox", [0, 0, width, height]);
 
 /**
  *
@@ -35,7 +29,7 @@ const svg = d3
  * 再在回调函数中执行绘制操作
  *
  */
-// 数据来源网页 https://observablehq.com/@d3/stacked-bar-chart/2 的文件附件
+// 数据来源网页 https://observablehq.com/@d3/stacked-horizontal-bar-chart/2 的文件附件
 const dataURL =
   "https://gist.githubusercontent.com/Benbinbin/af1c6678ca209296a3d7995829b553dd/raw/077c859be6023d915f3501a058aecc4efc9e60da/us-population-state-age.csv";
 
@@ -84,21 +78,49 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   console.log(series);
 
   /**
+   * 计算 svg 元素的高度
+   */
+  // 💡 在垂直堆叠条形图中，条带是横向分布的，所以每个条带的宽度与页面宽度相关
+  // 这是由于在桌面端的浏览器中水平滚动的操作比较麻烦 ❓ 所以一般 svg 的横向宽度一般不会超过页面的宽度，避免产生横向滚动
+  // 所以条带横向分布时，每个条带的宽度就是由页面的宽度所决定（通过横坐标轴的比例尺算出条带的带宽）
+  // 而在桌面端的浏览器中垂直滚动很方便，所以这里可以手动设置条带的宽度，再计算出 svg 的高度，比页面/屏幕的高度更大也无所谓
+  // 由于不需要将图表的高度限制在一页中，所以基于条形图中条带的数量，通过计算来求出 svg 的高度
+  // 这里 series[0].length 所获得的是条带的数量（对应于 52 个州），每个条带的宽度（包含间隔）是 25px
+  // 再加上 marginTop 和 marginBottom 上下的留白，总长作为 svg 的高度
+  height = series[0].length * 25 + marginTop + marginBottom;
+  console.log(height)
+
+  /**
    *
    * 构建比例尺
    *
    */
-  // 设置横坐标轴的比例尺
-  // 横坐标轴的数据是条形图的各种分类，使用 d3.scaleBand 构建一个带状比例尺
+  // 💡 设置横坐标轴的比例尺，与**垂直堆叠条形图**的纵坐标轴相对应
+  // 横坐标轴的数据是连续型的数值（各州的人口数量），使用 d3.scaleLinear 构建一个线性比例尺
+  // 具体参考官方文档 https://d3js.org/d3-scale/linear 或 https://github.com/d3/d3-scale/tree/main#linear-scales
+  // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#线性比例尺-linear-scales
+  const x = d3.scaleLinear()
+    // 设置定义域范围
+    // [0, xmax] 其中 xmax 是各州人口总和中的最大值
+    // 通过 d3.max() 从数据 data 中获取各州人口总和的最大值
+    .domain([0, d3.max(data, d => d.total)])
+    // 设置值域范围
+    // svg 元素的宽度（减去留白区域）
+    .range([marginLeft, width - marginRight]); // 这里的 width 宽度是页面宽度
+
+  // console.log(x.domain())
+
+  // 💡 设置纵坐标轴的比例尺，与**垂直堆叠条形图**的横坐标轴相对应
+  // 纵坐标轴的数据是条形图的各种分类，使用 d3.scaleBand 构建一个带状比例尺
   // 使用 d3-scale 模块
   // 具体参考官方文档 https://d3js.org/d3-scale/band 或 https://github.com/d3/d3-scale/blob/v4.0.2/README.md#scaleBand
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#带状比例尺-band-scales
-  const x = d3.scaleBand()
+  const y = d3.scaleBand()
     // 设置定义域范围（52 个州）
     // 使用 d3.union(data.map(d => d.name)) 从原数据中提取出州的名称的并集，并返回一个数组
     // 再使用 d3.sort() 对该数组的元素进行排序
     // 排序依据是各州的人口总和，按照降序排列，即人数较多的州排在前面
-    .domain(d3.sort(d3.union(data.map(d => d.name)), (stateA, stateB)=> {
+    .domain(d3.sort(d3.union(data.map(d => d.name)), (stateA, stateB) => {
       const stateAElem = data.find(element => element.name === stateA)
       const stateBElem = data.find(element => element.name === stateB)
 
@@ -110,30 +132,11 @@ d3.csv(dataURL, d3.autoType).then((data) => {
       }
     }))
     // 设置值域范围（所映射的可视元素）
-    // svg 元素的宽度（减去留白区域）
-    .range([marginLeft, width - marginRight])
-    .padding(0.1); // 并设置间隔占据（柱子）区间的比例
+    // 这里的 height 高度是前面根据条形图的条带宽度和数量计算出来的
+    .range([marginTop, height - marginBottom])
+    .padding(0.08); // 并设置间隔占据（柱子）区间的比例
 
-  // console.log(x.domain());
-
-  // 设置纵坐标轴的比例尺
-  // 纵坐标轴的数据是连续型的数值（各州的人口数量），使用 d3.scaleLinear 构建一个线性比例尺
-  // 具体参考官方文档 https://d3js.org/d3-scale/linear 或 https://github.com/d3/d3-scale/tree/main#linear-scales
-  // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#线性比例尺-linear-scales
-  const y = d3.scaleLinear()
-    // 设置定义域范围
-    // [0, ymax] 其中 ymax 是各州人口总和中的最大值
-    // 通过 d3.max() 从数据 data 中获取各州人口总和的最大值
-    .domain([0, d3.max(data, d => d.total)])
-    // 设置值域范围
-    // svg 元素的高度（减去留白区域）
-    // 使用 continue.rangeRound() 方法，可以进行修约，以便实现整数（人口）映射到整数（像素）
-    // ⚠️ 应该特别留意纵坐标轴的值域（可视化属性，这里是长度）范围 [bottom, top]
-    // 由于 svg 的坐标体系中向下和向右是正方向，和我们日常使用的不一致
-    // 所以这里的值域范围需要采用从下往上与定义域进行映射
-    .rangeRound([height - marginBottom, marginTop]);
-
-  // console.log(y.domain())
+  // console.log(y.domain());
 
   // 设置颜色比例尺
   // 为不同系列设置不同的配色
@@ -156,6 +159,21 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     // 当使用颜色比例尺时 color(value) 传入的参数定义域范围中，默认返回的颜色值
     .unknown("#ccc");
 
+
+
+  // 创建 svg
+  // 在容器 <div id="container"> 元素内创建一个 SVG 元素
+  // 主要使用 d3-selection 模块的 API
+  // 具体可以参考 https://github.com/d3/d3-selection 或 https://d3js.org/d3-selection
+  // 使用方法 d3.create("svg") 创建一个 svg 元素，并返回一个选择集 selection
+  // 使用选择集的方法 selection.attr() 为选择集中的所有元素（即 <svg> 元素）设置宽高和 viewBox 属性
+  const svg = d3
+    .select("#container")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [0, 0, width, height]);
+
   /**
    *
    * 绘制坐标轴
@@ -163,16 +181,20 @@ d3.csv(dataURL, d3.autoType).then((data) => {
    */
   // 绘制横坐标轴
   svg.append("g")
-    // 通过设置 CSS 的 transform 属性将横坐标轴容器「移动」到底部
-    .attr("transform", `translate(0,${height - marginBottom})`)
-    // 横轴是一个刻度值朝下的坐标轴
-    // 而且将坐标轴的外侧刻度 tickSizeOuter 长度设置为 0（即取消坐标轴首尾两端的刻度）
+    // 通过设置 CSS 的 transform 属性将横坐标轴容器「移动」到顶部
+    .attr("transform", `translate(0,${marginTop})`)
+    // 💡 横轴是一个刻度值朝上的坐标轴
+    // 并使用坐标轴对象的方法 axis.ticks() 设置坐标轴的刻度数量和刻度值格式
+    // 其中第一个参数用于设置刻度数量（这里设置的是预期值，并不是最终值，D3 会基于出入的数量进行调整，以便刻度更可视）
+    // 这里设置为 (width / 100) 基于页面的宽度来设置横坐标轴的预期刻度数量
+    // 而第二个参数用于设置刻度值格式，这里设置为 "s" 表示数值采用 SI-prefix 国际单位制词头，例如 k 表示千，M 表示百万
+    // 具体参考 https://en.wikipedia.org/wiki/Metric_prefix
     // 💡 注意这里使用的是方法 selection.call(axis) 的方式来调用坐标轴对象（方法）
     // 会将选择集中的元素 <g> 传递给坐标轴对象的方法，作为第一个参数
     // 以便将坐标轴在相应容器内部渲染出来
     // 具体参考官方文档 https://d3js.org/d3-selection/control-flow#selection_call 或 https://github.com/d3/d3-selection#selection_call
     // 或这一篇文档 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-binding#其他方法
-    .call(d3.axisBottom(x).tickSizeOuter(0))
+    .call(d3.axisTop(x).ticks(width / 100, "s"))
     // 删掉上一步所生成的坐标轴的轴线（它含有 domain 类名）
     .call(g => g.selectAll(".domain").remove());
 
@@ -181,13 +203,8 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     // 通过设置 CSS 的 transform 属性将纵向坐标轴容器「移动」到左侧
     .attr("transform", `translate(${marginLeft},0)`)
     // 纵轴是一个刻度值朝左的坐标轴
-    // 并使用坐标轴对象的方法 axis.ticks() 设置坐标轴的刻度数量和刻度值格式
-    // 具体参考官方文档 https://d3js.org/d3-axis#axis_ticks 或 https://github.com/d3/d3-axis/blob/v3.0.0/README.md#axis_ticks
-    // 其中第一个参数用于设置刻度数量，这里设置为 `null` 表示采用默认的刻度生成器
-    // 而第二个参数用于设置刻度值格式，这里设置为 "s" 表示数值采用 SI-prefix 国际单位制词头，例如 k 表示千，M 表示百万
-    // 具体参考 https://en.wikipedia.org/wiki/Metric_prefix
-    // 关于 D3 所提供的数值格式具体参考官方文档 https://github.com/d3/d3-format
-    .call(d3.axisLeft(y).ticks(null, "s"))
+    // 而且将坐标轴的外侧刻度 tickSizeOuter 长度设置为 0（即取消坐标轴首尾两端的刻度）
+    .call(d3.axisLeft(y).tickSizeOuter(0))
     // 删掉上一步所生成的坐标轴的轴线（它含有 domain 类名）
     .call(g => g.selectAll(".domain").remove());
 
@@ -232,24 +249,23 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     // 每个元素是一个二元数组，第一个元素是堆叠小矩阵的下边界；第二个元素是上边界；另外数组对象还具有一个属性 data 它包含原始数据（它也是一个二元数组，其中第一个元素 data[0] 就是所属的州的名称）
     // 这个函数的作用是为每个元素（数组对象）添加一个 key 属性（所属的系列名称/年龄分组），然后返回本身
     .data(D => D.map(d => (d.key = D.key, d)))
-    .join("rect") // 将元素绘制到页面上
+    .join("rect")
       // 为每个小矩形分别设置左上角 (x, y) 及其 width 和 height 来确定其定位和形状
-      // 每个矩形的左上角横轴定位 x 由它所属的州的名称决定
+      // 💡 每个矩形的左上角横轴定位 x 由它的堆叠下边界决定
+      // 可以通过它所绑定的数据（一个数组）的第一个元素 d[0] 来获取
+      // 使用横坐标轴的比例尺（线性比例尺）进行映射，求出具体的横轴坐标值
+      .attr("x", d => x(d[0]))
+      // 💡 每个矩形的左上角纵轴定位 y 由它所属的州的名称决定
       // 可以通过所绑定数据的属性 d.data.name 来获取
-      // 使用横坐标轴的比例尺（带状比例尺）进行映射，求出具体的横轴坐标值
-      .attr("x", d => x(d.data.name))
-      // 每个矩形的左上角纵轴定位 y 由它的堆叠下边界决定
-      // 可以通过它所绑定的数据（一个数组）的第二个元素 d[1] 来获取
-      // 使用纵坐标轴的比例尺（线性比例尺）进行映射，求出具体的纵轴坐标值
-      .attr("y", d => y(d[1]))
-      // 每个矩形的高度
-      // 由所绑定的数组的两个元素（上边界和下边界）之间的差值所决定
-      // ⚠️ 注意这里的差值是 y(d[0]) - y(d[1]) 因为 svg 的坐标体系中向下是正方向
-      // 所以下边界 d[0] 所对应的纵坐标值 y(d[0]) 会更大，减去 y(d[1]) 的值求出的差值才是高 度
-      .attr("height", d => y(d[0]) - y(d[1]))
+      // 使用纵坐标轴的比例尺（带状比例尺）进行映射，求出具体的纵轴坐标值
+      .attr("y", d => y(d.data.name))
       // 每个矩形的宽度
-      // 通过横轴的比例尺的方法 x.bandwidth() 获取 band 的宽度（不包含间隙 padding）
-      .attr("width", x.bandwidth())
+      // ⚠️ 需要通过纵坐标轴比例尺的方法 y.bandwidth() 获取 band 的宽度
+      // 而不是前面设置的 25px，因为该值是包含条带之间的间隙的
+      .attr("height", y.bandwidth())
+      // 💡 每个矩形的宽度
+      // 由所绑定的数据（一个数组）的两个元素（上边界和下边界）之间的差值所决定
+      .attr("width", d => x(d[1]) - x(d[0]))
     // 最后为每个矩形 <rect> 元素之内添加 <title> 元素
     // 以便鼠标 hover 在相应的小矩形之上时，可以显示 tooltip 提示信息
     .append("title")
