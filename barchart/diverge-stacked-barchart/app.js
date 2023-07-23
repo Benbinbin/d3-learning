@@ -329,19 +329,21 @@ d3.csv(
     .call(g => g.select(".domain").remove())
     // 为正向横坐标轴添加注释文字
     .call(g => g.append("text")
+      .attr('font-size', '14px')
       // 设置文本的定位（在 x 和 y 方向上的偏移量）
       .attr("x", x(0) + 20)
       .attr("y", -24)
       .attr("fill", "currentColor") // 设置文字的颜色
       .attr("text-anchor", "start") // 设置文字的对齐方式
-      .text(data.positive))
+      .text("More truths →"))
     // 为负向横坐标轴添加注释文字
     .call(g => g.append("text")
+      .attr('font-size', '14px')
       .attr("x", x(0) - 20)
       .attr("y", -24)
       .attr("fill", "currentColor")
       .attr("text-anchor", "end")
-      .text(data.negative));
+      .text("← More falsehoods"));
 
   // 绘制纵坐标轴
   svg.append("g")
