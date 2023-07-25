@@ -101,7 +101,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#线性比例尺-linear-scales
   const x = d3.scaleLinear()
     // 设置定义域范围
-    // [0, xmax] 其中 xmax 是各州人口总和中的最大值
+    // [0, xmax] 其中 xmax 是各州人口累计值中的最大值
     // 通过 d3.max() 从数据 data 中获取各州人口总和的最大值
     .domain([0, d3.max(data, d => d.total)])
     // 设置值域范围
@@ -113,7 +113,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   // 💡 设置纵坐标轴的比例尺，与**垂直堆叠条形图**的横坐标轴相对应
   // 纵坐标轴的数据是条形图的各种分类，使用 d3.scaleBand 构建一个带状比例尺
   // 使用 d3-scale 模块
-  // 具体参考官方文档 https://d3js.org/d3-scale/band 或 https://github.com/d3/d3-scale/blob/v4.0.2/README.md#scaleBand
+  // 具体参考官方文档 https://d3js.org/d3-scale/band 或 https://github.com/d3/d3-scale#scaleBand
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#带状比例尺-band-scales
   const y = d3.scaleBand()
     // 设置定义域范围（52 个州）

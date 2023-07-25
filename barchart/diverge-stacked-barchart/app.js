@@ -210,10 +210,11 @@ d3.csv(
   // 设置纵坐标轴的比例尺
   // 纵坐标轴的数据是条形图的各种分类，使用 d3.scaleBand 构建一个带状比例尺
   // 使用 d3-scale 模块
-  // 具体参考官方文档 https://d3js.org/d3-scale/band 或 https://github.com/d3/d3-scale/blob/v4.0.2/README.md#scaleBand
+  // 具体参考官方文档 https://d3js.org/d3-scale/band 或 https://github.com/d3/d3-scale#scaleBand
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#带状比例尺-band-scales
   const y = d3.scaleBand()
     // 设置定义域范围（9 个总统候选人的名称）
+    // 所使用的数组 bias 已经排好序，根据每个总统候选人的负面类别的数据的总和进行排序
     .domain(bias.map(([name]) => name))
     // scale.rangeRound() 方法，可以进行修约，以便实现整数（人）映射到整数（像素）
     .rangeRound([marginTop, height - marginBottom])
