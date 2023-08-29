@@ -1,4 +1,4 @@
-// 参考自 https://observablehq.com/@d3/line-chart/2
+// 参考自 https://observablehq.com/@d3/line-chart-missing-data/2
 
 /**
  *
@@ -31,13 +31,18 @@ const svg = d3
  * 再在回调函数中执行绘制操作
  *
  */
-// 数据来源网页 https://observablehq.com/@d3/line-chart/2 的文件附件
+// 数据来源网页 https://observablehq.com/@d3/line-chart-missing-data/2 的文件附件
 const dataURL =
   "https://gist.githubusercontent.com/Benbinbin/61a819373d0eada06b7966a560aafc7e/raw/979711fba712b0263309234239bfbd144a8a3edc/aapl.csv";
 
 d3.csv(dataURL, d3.autoType).then((aapl) => {
   // 需要检查一下数据解析的结果，可能并不正确，需要在后面的步骤里再进行相应的处理
   console.log(aapl);
+
+  // 💡 遍历 aapl 数组的每一个元素，修改数据点（对象）的属性 close 的值，以手动模拟数据缺失的情况
+  // 当数据点所对应的日期的月份小于三月份（包含），则收盘价改为 NaN；否则就采用原始值
+  // 📢 由于 JS 的日期中，月份是按 0 开始算起的，所以 1、2、3 月份是满足以下的判断条件 d.date.getUTCMonth() < 3
+  const aaplMissing = aapl.map(d => ({ ...d, close: d.date.getUTCMonth() < 3 ? NaN : d.close })) // simulate gaps
 
   /**
    *
@@ -119,6 +124,13 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
   // 具体可以参考官方文档 https://d3js.org/d3-shape/line 或 https://github.com/d3/d3-shape/tree/main#lines
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-shape#线段生成器-lines
   const line = d3.line()
+    // 💡 调用线段生成器方法 line.defined() 设置数据完整性检验函数
+    // 该函数会在调用线段生成器时，为数组中的每一个元素都执行一次，返回布尔值，以判断该元素的数据是否完整
+    // 该函数也是有三个入参，当前的元素 `d`，该元素在数组中的索引 `i`，整个数组 `data`
+    // 当函数返回 true 时，线段线段生成器就会执行下一步（调用坐标读取函数），最后生成该元素相应的坐标数据
+    // 当函数返回 false 时，该元素就会就会跳过，当前线段就会截止，并在下一个有定义的元素再开始绘制，反映在图上就是一段段分离的线段
+    // 这里通过判断数据点的属性 d.close（收盘价）是否为 NaN 来判定该数据是否缺失
+    .defined(d => !isNaN(d.close))
     // 设置横坐标读取函数
     // 该函数会在调用线段生成器时，为数组中的每一个元素都执行一次，以返回该数据所对应的横坐标
     // 这里基于每个数据点的日期（时间）d.date 并采用比例尺 x 进行映射，计算出相应的横坐标
@@ -126,16 +138,29 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
     // 设置纵坐标读取函数
     .y(d => y(d.close));
 
-  // 将线段路径绘制到页面上
+  // 💡 先绘制灰色的线段
   svg.append("path") // 使用路径 <path> 元素绘制折线
     // 只需要路径的描边作为折线，不需要填充，所以属性 fill 设置为 none
     .attr("fill", "none")
     // 设置描边颜色
-    .attr("stroke", "steelblue")
+    .attr("stroke", "#ccc")
     // 设置描边宽度
     .attr("stroke-width", 1.5)
+    // 这里采用过滤掉缺失的数据点的 aaplMissing 作为绘制线段的数据集
     // 由于线段生成器并没有调用方法 line.context(parentDOM) 设置父容器
     // 所以调用线段生成器 line(aapl) 返回的结果是字符串
     // 该值作为 `<path>` 元素的属性 `d` 的值
-    .attr("d", line(aapl));
+    .attr("d", line(aaplMissing.filter(d => !isNaN(d.close))));
+  // 其实以上的操作绘制了一个完整的折线图，由于过滤掉缺失的数据点，所以可以绘制出了一个完整（无缺口）的折线图
+  // 由于 **线性插值法 linear interpolation** 是线段生成器在绘制线段时所采用的默认方法，所以对于那些缺失数据的位置，通过连接左右存在的完整点，绘制出的「模拟」线段来填补缺口
+
+  // 将线段路径绘制到页面上
+  svg.append("path")
+    .attr("fill", "none")
+    .attr("stroke", "steelblue")
+    .attr("stroke-width", 1.5)
+    // 这里采用含有缺失数据的 aaplMissing 作为绘制线段的数据集
+    .attr("d", line(aaplMissing));
+  // 由于含有缺失数据，所以绘制出含有缺口的折线图
+  // 蓝色折线图覆盖（重叠）在前面所绘制的灰色折线图上，所以最终的效果是在缺口位置由灰色的线段填补
 });
