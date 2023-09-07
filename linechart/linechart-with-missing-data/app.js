@@ -120,7 +120,7 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
    */
   // 使用方法 d3.line() 创建一个线段生成器
   // 线段生成器会基于给定的坐标点生成线段（或曲线）
-  // 调用线段生成器时返回的结果，会基于生成器是否设置了父容器 context 而不同。如果设置了父容器，则生成 `<path>` 元素，并添加到父容器中；如果没有则生成字符串，可以作为 `<path>` 元素的属性 `d` 的值
+  // 调用线段生成器时返回的结果，会基于生成器是否设置了画布上下文 context 而不同。如果设置了画布上下文 context，则生成一系列在画布上绘制路径的方法，通过调用它们可以将路径绘制到画布上；如果没有设置画布上下文 context，则生成字符串，可以作为 `<path>` 元素的属性 `d` 的值
   // 具体可以参考官方文档 https://d3js.org/d3-shape/line 或 https://github.com/d3/d3-shape/tree/main#lines
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-shape#线段生成器-lines
   const line = d3.line()

@@ -209,7 +209,8 @@ d3.csv(dataURL, ({ Format, Year, ["Revenue (Inflation Adjusted)"]: Revenue }) =>
       // 方法 d3.ticks(start, stop, count) 根据 count 数量对特定范围（由 start 和 stop 指定）进行均分
       // 返回一个包含一系列分隔值的数组，用作刻度值
       // 第一、二个参数 start 和 stop 分别指定范围的起始和结束值
-      // 这里先通过 d3.extent(x.domain()) 获取横坐标轴比例尺的定义域范围，在通过解构来获取 start 和 stop
+      // 这里先通过 d3.extent(x.domain()) 获取横坐标轴比例尺的定义域范围
+      // 返回值是一个数组 [xmin, xmax]，再通过解构来获取 start 和 stop
       // 第三个参数 count 作为分割数量的参考值，避免过多的刻度值出现，相互重叠影响阅读
       // 具体参考官方文档 https://d3js.org/d3-array/ticks#ticks 或 https://github.com/d3/d3-array/tree/main#ticks
       // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#刻度生成
