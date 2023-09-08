@@ -200,7 +200,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   svg.append("path") // 使用路径 <path> 元素绘制折线
     .attr("fill", "none") // 只需要路径的描边作为折线，不需要填充，所以属性 fill 设置为 none
     .attr("stroke", "currentColor") // 设置描边颜色
-    // stroke-miterlimit 属性约束两端折线相交时接头的尖端长度
+    // stroke-miterlimit 属性约束两段折线相交时接头的尖端长度
     // 如果在绘制折线图时数据点较多，可以将元素 `<path>` 的属性 `stroke-miterlimit` 设置为 `1`
     // 以避免折线「锋利」交接处过渡延伸，导致该点的数据偏移
     .attr("stroke-miterlimit", 1)
