@@ -1,4 +1,4 @@
-// 参考自 https://observablehq.com/@benbinbin/gradient-encoding
+// 参考自 https://observablehq.com/@d3/threshold-encoding
 
 /**
  *
@@ -34,7 +34,7 @@ const svg = d3
  * 再在回调函数中执行绘制操作
  *
  */
-// 数据来源网页 https://observablehq.com/@benbinbin/gradient-encoding 的文件附件
+// 数据来源网页 https://observablehq.com/@d3/threshold-encoding 的文件附件
 const dataURL =
   "https://gist.githubusercontent.com/Benbinbin/9d2b7459bd33f2baf1457ecfc983534c/raw/8926c7f07473a597b93448f02c3bf4537c5aa6db/temperature.csv";
 
@@ -77,17 +77,8 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     // svg 元素的高度（减去留白区域）
     .rangeRound([height - marginBottom, marginTop]);
 
-  // 设置颜色比例尺
-  // 为不同的温度值设置不同的配色
-  // 使用 d3.scaleSequential 构建一个顺序比例尺 Sequential Scales 将连续型的定义域映射到连续型的值域
-  // 它和线性比例尺类似，但是它的配置方式并不相同，通过会指定一个插值器 interpolator 作为值域
-  // 具体参考官方文档 https://d3js.org/d3-scale/sequential 或 https://github.com/d3/d3-scale/tree/main#sequential-scales
-  // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#顺序比例尺-sequential-scales
-  // 以下创建顺序比例尺时，同时设置了定义域与值域（插值器）
-  // 其中定义域采用纵坐标轴比例尺的定义域（即数据集中温度值的范围）
-  // 而插值器是 D3 的内置配色方案 d3.interpolateTurbo 可以从连续型的彩虹色中进行颜色「采样」
-  // 具体可以查看 https://d3js.org/d3-scale-chromatic/sequential#interpolateTurbo
-  const color = d3.scaleSequential(y.domain(), d3.interpolateTurbo);
+  // 💡 计算数据集 temperatures 中所有温度值的中位数，以其作为阈值
+  const threshold = d3.median(data, d => d.temperature);
 
   /**
    *
@@ -119,10 +110,17 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     // 删掉上一步所生成的坐标轴的轴线（它含有 domain 类名）
     .call(g => g.select(".domain").remove())
     // 💡 为纵坐标轴添加注释（温度的单位标记）
-    // 这里并没有添加一个 <text> 元素
-    // 而是直接选取坐标轴的最后一个刻度（通过 class 选择器 .tick:last-of-type）里面的 `<text>` 标签
-    // 再在 `<text>` 元素里添加 `<tspan>` 元素，并设置内容，这样就可以为 `<text>` 元素添加额外的文本
-    .call(g => g.select(".tick:last-of-type text").append("tspan").text("°F"));
+    // 拷贝最后一个刻度（通过 class 选择器 .tick:last-of-type）里面的 `<text>` 标签
+    .call(g => g.select(".tick:last-of-type text").clone()
+      // 调整定位，水平向右偏移 3px
+      .attr("x", 3)
+      // 设置文本对齐方式
+      .attr("text-anchor", "start")
+      // 设置字体样式为加粗
+      .attr("font-weight", "bold")
+      // 设置/覆写文本内容
+      .text("°F"));
+
 
   /**
    *
@@ -151,30 +149,29 @@ d3.csv(dataURL, d3.autoType).then((data) => {
       // 而横坐标轴比例尺 x 和 svg 的宽度，这两者的坐标的参考系都是相对于整个 SVG 视图的
       .attr("gradientUnits", "userSpaceOnUse")
       .attr("x1", 0) // 渐变色的起始点的横坐标
-      .attr("y1", height - marginBottom) // 渐变色的起始点的纵坐标
+      .attr("y1", 0) // 渐变色的起始点的纵坐标
       .attr("x2", 0) // 渐变色的终止点的横坐标
-      .attr("y2", marginTop) // 渐变色的终止点的纵坐标
+      .attr("y2", height) // 渐变色的终止点的纵坐标
       // 这里设置起始点和终止点的横坐标都是 0，由于渐变色是沿纵坐标轴变化的（以显示温度的变化），所以横坐标采用 0 即可
-      // ⚠️ 注意 svg 的坐标体系中向下是正方向，所以渐变色的起始点 (0, height-marginBottom) 是在 y 轴的底部，终止点 (0, marginTop) 是在 y 轴的顶部
+      // ⚠️ 注意 svg 的坐标体系中向下是正方向，所以渐变色的起始点 (0, 0) 是在 y 轴的顶部，终止点 (0, height) 是在 y 轴的底部
     // 进行二次选择，在元素 <linearGradient> 内添加一系列的 <stop> 元素，以切换渐变色
     .selectAll("stop")
       // 绑定数据
-      // 使用方法 d3.ticks(start, stop, count) 根据 count 数量对特定范围（由 start 和 stop 指定）进行均分
-      // 返回一个包含一系列分隔值的数组（一般作刻度值）
-      .data(d3.ticks(0, 1, 10))
-      // ⚠️ 注意这里所绑定的数据并不是原始数据集 data，而是构建出来的从 0 到 1，共 11 个元素的等差数列
-      // 由于渐变色随纵坐标轴的值变化（而不是随时间变化，而数据点是随时间变化的，所以不是绑定原始数据集）
-      // 这里构建出来数组（从 0 到 1 的等差数列），每个元素表示一个百分比，即相对于 y 轴的位置（偏移量）
+      // 手动构建出一个数组，每个元素都是一个对象，其中包含了属性 offset（偏移量）和属性 color（对应的颜色）
+      // 其中第一个元素的偏移量是一个百分比 y(threshold) / height 即中位数相对于 y 轴的位置，颜色是红色
+      // 而第二个元素的偏移量是一样的，也是 y(threshold) / height 中位数相对于 y 轴的位置，颜色是黑色的
+      .data([
+        { offset: y(threshold) / height, color: "red" },
+        { offset: y(threshold) / height, color: "black" }
+      ])
+    // 将一系列的 <stop> 元素添加到 <linearGradient> 元素里
     .join("stop")
-      .attr("offset", d => d)
-      // 针对（相对于纵坐标轴）不同的偏移量设置不同的颜色
-      // 其中 color.interpolator() 返回颜色比例尺 color 所采用的插值器，即 d3.interpolateTurbo
-      // 插值器会根据当前的相对偏移量 d（百分比形式，其范围是 [0, 1]）进行采样，返回相应的颜色值
-      // 这里共采样生成 11 种颜色
-      .attr("stop-color", color.interpolator());
-      // ❓ 在颜色采样时不需要基于温度值数据，所以前面所构建的（与温度相关）颜色比例尺实际没有用处
-      // 这里可以直接使用 d3.interpolateTurbo 就不需要在前面构建颜色比例尺 ❓
-      // .attr("stop-color", d3.interpolateTurbo);
+      .attr("offset", d => d.offset) // 设置 offset 偏移量
+      .attr("stop-color", d => d.color); // 设置 stop-color 颜色值
+    // 根据以上手动构建的数组，可以知道会对应生成两个 <stop> 元素
+    // ⚠️ 因为 svg 的坐标体系中向下是正方向，渐变色的起始点是 (0, 0) 终止点是 (0, height)
+    // 所以从起始点到第一个 <stop> 所设置的偏移量的位置（y 轴的中间）为止，这一个范围的线段都是红色
+    // 由于第二个 <stop> 所设置的偏移量和第一个 <stop> 的偏移量一样，所以从 y 轴的中间位置到 y 轴底部，这一个范围的线段都是黑色
 
   /**
    *

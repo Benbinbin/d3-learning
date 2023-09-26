@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Threshold encoding Line Chart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    svg {
+      border: 2px solid orange;
+    }
+
+    #container {
+      width: 100%;
+      height: 70vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="mx-auto my-6 text-center">
+    <h1 class="py-8 text-2xl font-bold">阈值二色折线图</h1>
+    <p>该折线图基于温度值与一个 threshold 阈值/临界值的大小关系，而编码不同的颜色</p>
+    <p>当 y 值大于数据集的中位数，线段为<span style="border-bottom: solid red 2px">红色</span>；当 y 值小于数据集的中位数，线段为<span style="border-bottom: solid black 2px">黑色</span></p>
+    <div class="py-2 text-sm flex flex-wrap justify-center items-center gap-4">
+      <a href="../../index.html" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">首页</a>
+      <a href="https://observablehq.com/@benbinbin/threshold-encoding" target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">参考</a>
+      <a href="https://github.com/Benbinbin/d3-learning/tree/main/linechart/threshold-encoding-line-chart/" target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">代码</a>
+      <a href="https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-line-chart#彩色折线图" target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">笔记</a>
+    </div>
+  </div>
+  <div id="container" class="flex justify-center items-center"></div>
+  <script src="app.js"></script>
+</body>
+
+</html>
