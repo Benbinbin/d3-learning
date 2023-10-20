@@ -41,10 +41,10 @@
     <section v-for="item of content" class="container">
       <!-- chart type -->
       <h2 class="my-6">
-        <button class="p-2 text-2xl font-bold text-gray-800  border-l-4 border-gray-500 rounded-l-sm rounded-r transition-colors duration-300"
-        :class="collapsedThemeArr.has(item.theme) ? 'bg-gray-300 hover:bg-gray-200' : 'hover:bg-gray-300'"
-        @click="toggleTheme(item.theme)"
-        >{{
+        <button
+          class="p-2 text-2xl font-bold text-gray-800  border-l-4 border-gray-500 rounded-l-sm rounded-r transition-colors duration-300"
+          :class="collapsedThemeArr.has(item.theme) ? 'bg-gray-300 hover:bg-gray-200' : 'hover:bg-gray-300'"
+          @click="toggleTheme(item.theme)">{{
           item.themeTitle || item.theme }}</button>
       </h2>
       <!-- example list -->
@@ -302,6 +302,12 @@
                 folder: 'inline-labels-line-chart',
                 note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-line-chart#带标注的折线图'
               },
+              {
+                name: '斜率图',
+                reference: 'https://observablehq.com/@benbinbin/slope-chart',
+                folder: 'slope-chart',
+                note: 'https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-line-chart#斜率图'
+              },
             ]
           },
           {
@@ -352,7 +358,7 @@
 
         const toggleTheme = (theme) => {
           console.log(collapsedThemeArr.value.has(theme))
-          if(collapsedThemeArr.value.has(theme)) {
+          if (collapsedThemeArr.value.has(theme)) {
             collapsedThemeArr.value.delete(theme)
           } else {
             collapsedThemeArr.value.add(theme)
