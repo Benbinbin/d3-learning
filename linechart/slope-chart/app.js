@@ -230,7 +230,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
 // 对它们进行迭代处理，以便对布局定位进一步优化，提高标签的视觉可视性
 // 第二个参数 separation 是标签间的距离（需要保证标签之间的间距要足够大于该值，这个值应该是基于标签字体大小/行高而设置的）
 // 第三个参数 maxiter 是最大的迭代次数
-// 第四个参数 maxerror 是迭代
+// 第四个参数 maxerror 用于限制调整标签时所移动的步长（当所需调整移动步长过小，则可以提前结束迭代）
 function dodge(positions, separation = 10, maxiter = 10, maxerror = 1e-1) {
   positions = Array.from(positions); // 转换为数组（保险操作 ❓ 这一步可忽略 ❓）
   let n = positions.length; // 数组长度
