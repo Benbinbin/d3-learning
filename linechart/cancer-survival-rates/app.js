@@ -1,4 +1,4 @@
-// 参考自 https://observablehq.com/@d3/slope-chart/3
+// 参考自 https://observablehq.com/@d3/cancer-survival-rates/2
 
 /**
  *
@@ -35,9 +35,9 @@ const svg = d3
  * 再在回调函数中执行绘制操作
  *
  */
-// 数据来源网页 https://observablehq.com/@d3/slope-chart/3 的文件附件
+// 数据来源网页 https://observablehq.com/@d3/cancer-survival-rates/2 的文件附件
 const dataURL =
-  "https://gist.githubusercontent.com/Benbinbin/9de278ddf6c44d05b41297cce5335cfb/raw/ee28a3cde18ec282bdb1ae2a68e12bf27263f1a2/government-receipts-of-gdp.csv";
+  "https://gist.githubusercontent.com/Benbinbin/1e3c9c7355f033d60602e888d5fdb095/raw/2e2ef91dc6e6e23b2d5390e9bbef11873a2a44e7/cancer.csv";
 
 d3.csv(dataURL, d3.autoType).then((data) => {
   // 需要检查一下数据解析的结果，可能并不正确，需要在后面的步骤里再进行相应的处理
@@ -48,34 +48,35 @@ d3.csv(dataURL, d3.autoType).then((data) => {
    * 构建比例尺
    *
    */
+  // 获取斜率图的每条线段是由哪几步 steps（时间点）构成的
+  // 默认只有 1 步，即斜率图的每个线段都只是由两个端点/时间点构成（连成一条线段）
+  // 这里通过构建一个集合 set 来去重，以便统计数据集 data 中有哪些不同时间点
+  const steps = [...new Set(data.map(d => d.year))];
+
   // 设置横坐标轴的比例尺
-  // 横坐标轴的数据虽然是时间（年份），但是这里将它们看作是不同的（离散的）类别（两个年份表示两个类别）
+  // 横坐标轴的数据离散的类别（实际是字符串，表示生存的时间，以年为单位）
   // 使用 d3.scalePoint 构建一个点状比例尺，根据定义域数组的离散元素的数量，将值域的范围分割为等距的各段，各个**分隔点**与定义域中的离散元素依次映射
   // 具体可以参考官方文档 https://d3js.org/d3-scale/point#scalePoint
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#点状比例尺-point-scales
   // 💡 点状比例尺和带状比例尺 band scale（一般用于柱状图中）类似，就像是将 band 的宽度设置为 0
   const x = d3.scalePoint()
-    // 这里没有从原始数据集中提取出年份作为定义域的数组，而是直接构建 [0, 1] 数组（元素的数量与不同年份的数量一致即可，都是 2）
-    // 对于后续的映射并无很大影响，只需要进行对应的关联即可
-    .domain([0, 1])
+    // 设置定义域范围，该数组包含了所有的（生存时长）类型
+    .domain(steps)
     // 设置值域范围（所映射的可视元素）
     // svg 元素的宽度（减去留白区域）
     .range([marginLeft, width - marginRight])
     // 设定预留的左右空间（外间隔，以便放置文字标签）
     // 传入的数值是百分比，范围在 0 至 1 之间（包含端点），是以分割所得的等距宽度作为基准，假如设置为 1 则表示两侧预留空白的宽度，和分割所得的等距段的宽度一致
-    .padding(0.3);
+    .padding(0.5);
 
   // 设置纵坐标轴的比例尺
-  // 纵坐标轴的数据是连续型的数值（GDP 占比），使用 d3.scaleLinear 构建一个线性比例尺
+  // 纵坐标轴的数据是连续型的数值（生存率），使用 d3.scaleLinear 构建一个线性比例尺
   // 具体参考官方文档 https://d3js.org/d3-scale/linear
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#线性比例尺-linear-scales
   const y = d3.scaleLinear()
-    // 设置定义域范围
-    // 先使用 JS 数组原生方法 arr.flatMap(mapFunc) 对原数据集 data 进行转换
-    // 该方法先遍历数组的每一个元素（让它们分别执行 mapFunc 函数），然后再将所得的嵌套数组展平（一级）
-    // 这里的作用就是将每个数据点（国家）两个年份所对应值 GDP 占比值提取出来，构成一个二元数组，再展开整合到一个数组中
-    // 最后用 d3.extent() 计算出这些 GDP 占比值的范围
-    .domain(d3.extent(data.flatMap(d => [d[1970], d[1979]])))
+    // 设置定义域范围 [ymin, ymax]
+    // 使用 d3.extent() 计算出数据集 data 中的生存率 d.survival 范围
+    .domain(d3.extent(data.map(d => d.survival)))
     // 设置值域范围
     // svg 元素的高度（减去留白区域）
     .range([height - marginBottom, marginTop]);
@@ -86,26 +87,24 @@ d3.csv(dataURL, d3.autoType).then((data) => {
    *
    */
   // 绘制横坐标轴
-  // 实际上这里并没有使用坐标轴相关的模块，只是添加了两个文本标签，以标记不同的年份（作为两个类别）
+  // 实际上这里并没有使用坐标轴相关的模块，只是添加了一些文本标签，以标记不同的生存时长（类别）
   // 💡 可以将其理解为没有轴线的横坐标轴
   svg.append("g")
     // 设置文字的对齐方式
     .attr("text-anchor", "middle")
     .selectAll("g") // 为不同的文本标签创建容器 <g>
-    // 绑定数据
-    // 这里绑定的数据是数组 [0, 1]（其实该数组的两个元素分别对应于两个年份）
-    // 和前面 ☝️ 设置横坐标轴的比例尺的定义域时所绑定的数据一致
-    .data([0, 1])
+    // 绑定数据，数组 steps 包含了不同的生存时长
+    .data(steps)
     .join("g") // 将元素绘制到页面上
     // 通过设置 CSS 的 transform 属性将不同的容器「移动」到相应的位置
-    // 基于绑定数据 i（这里用符号 i 表示，因为所绑定的数组的元素和它的索引值一样）再通过横坐标轴比例尺 x(i) 进行映射，得到相应的横坐标值；而纵坐标值都是 20（即移动到 svg 的顶部，距离 20px 的位置）
-    .attr("transform", (i) => `translate(${x(i)},20)`)
+    // 基于绑定数据 d 再通过横坐标轴比例尺 x(d) 进行映射，得到相应的横坐标值；而纵坐标值都是 20px
+    .attr("transform", (d) => `translate(${x(d)},20)`)
     // 在每个容器中都添加一个 `<text>` 元素，以设置文本内容
-    // 基于所绑定的数据 i 来设置不同的内容，如果不为 0（绑定的是数组的第二个元素），则设置的文本内容是 1979；否则为 1970
-    .call(g => g.append("text").text((i) => i ? 1979 : 1970))
+    // 文本内容是所绑定的数据 d 生存时长
+    .call(g => g.append("text").text((d) => d))
     // 在每个容器中都添加一个 `<line>` 元素（以绘制一小段直线），作为坐标轴的刻度线
     // 直线的起始点的纵坐标值 y1 都是 3，终止点的纵坐标值 y2 都是 9（所以这一段小直线长度为 6px）
-    // 由于直线的方向是垂直向下的，即起始点和终止点的横坐标值是相同的，所以可以忽略不设置（采用默认值）
+    // 由于直线的方向是垂直向下的，即起始点和终止点的横坐标值是相同的，所以可以忽略不设置（采用默认值，所以横坐标和容器的位置一样，☝️ 在前面用 CSS 的 transform 设置的）
     // 最后设置直线的描边颜色，继承父元素的颜色（黑色）
     .call(g => g.append("line").attr("y1", 3).attr("y2", 9).attr("stroke", "currentColor"));
 
@@ -121,14 +120,11 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   const line = d3.line()
     // 该函数会在调用线段生成器时，为数组中的每一个元素都执行一次横坐标读取函数和纵坐标读取函数，以返回该数据所对应的横纵坐标值
     // 设置横坐标读取函数
-    // 这里基于每个数据点索引值 i 并采用比例尺 x(i) 进行映射，计算出相应的横坐标
-    // 因为 ☝️ 前面设置横坐标轴的比例尺时，定义域直接使用数组 [0, 1] （而不是年份）
-    .x((d, i) => x(i))
+    // 这里基于每个数据点的生存时长 d.year 并采用比例尺 x 进行映射，计算出相应的横坐标
+    .x(d => x(d.year))
     // 设置纵坐标读取函数
-    // 这里直接传入纵坐标比例尺作为读取函数
-    // 其实也是让数据点 d 调用该比例尺，然后将返回值作为纵坐标值
-    // 相当于 d => y(d)
-    .y(y);
+    // 这里基于每个数据点的生存率 d.survival 并采用比例尺 y 进行映射，计算出相应的纵坐标
+    .y(d => y(d.survival));
 
   // 绘制（多条）折线
   // 为这些线段创建一个容器 <g>
@@ -137,17 +133,24 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     .attr("fill", "none")
     // 设置描边颜色
     .attr("stroke", "currentColor")
-    // 使用路径 <path> 元素为每个国家创建一条线段
+    // 使用路径 <path> 元素为每个国家创建一条折线（包括多个步骤，分成多条线段）
     .selectAll("path")
     // 绑定数据 data
-    // 其中每个元素（对象）都是一个国家的数据，对应分别绑定到不同的 <path> 元素上，就可以绘制出多条不同的线段
-    .data(data)
+    // 先使用 D3 的内置方法 d3.group(iterable, ...keys) 对可迭代对象的元素进行分组转换
+    // 第一参数 iterable 是需要分组的可迭代对象
+    // 第二个参数 ...keys 是一系列返回分组依据的函数，数据集中的每个元素都会调用该函数，入参就是当前遍历的元素 d
+    // 并返回一个 InterMap 对象（映射，键名是分组依据，相应的值是在原始数组中属于该分组的元素）
+    // 具体可以参考官方文档 https://d3js.org/d3-array/group#group
+    // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#转换
+    // 在这里是基于癌症的名称 d => d.name 对数据集 data 的元素进行分组
+    // 共有 24 个癌症类别，它们分别绑定一个 <path> 元素
+    // InterMap 对象的每个映射绑定到相应的元素上时，会变成一个二元数组，第一个元素是键名（即癌症的名称），第二个元素是一个数组，由原数据集中属于该癌症类别的数据点组成
+    .data(d3.group(data, d => d.name))
     .join("path") // 将这些线段绘制到页面上
-    // 其中每个 <path> 元素的属性 `d` 的值是由函数 (d) => line([d[1970], d[1979]]) 返回值而定
-    // 该函数所接受的参数 d 是所绑定的数据点（是一个对象，具有三个属性 {1970: number , 1979: number, country: string }）
-    // 这里提取了每个国家在 1970 年和 1979 年的数据数组 [d[1970], d[1979]] 传入到线段生成器 line() 中，生成线段
-    // 所以每个国家的线段只由两个端点连接而成（分别对应 1970 年和 1979 年 GDP 占比）
-    .attr("d", (d) => line([d[1970], d[1979]]));
+    // 解构出所绑定数据（一个二元数组）的第二个元素 values，它是一个数组，包含该癌症类别的一系列数据点，用它们绘制折线
+    // 调用线段生成器 line(values) 返回的结果是字符串
+    // 该值作为 `<path>` 元素的属性 `d` 的值
+    .attr("d", ([, values]) => line(values));
 
   /**
    *
@@ -161,20 +164,29 @@ d3.csv(dataURL, d3.autoType).then((data) => {
 
   // 为这些标注添加一个容器
   svg.append("g")
-    // 为两个年份的标注分别设置一个容器（以便在沿横轴方向上分别进行定位）
+    // 为每个生存时长（类别）的标注分别设置一个容器（以便在沿横轴方向上分别进行定位）
     .selectAll("g")
     // 绑定数据
-    // 这里绑定的数据是数组 [0, 1]（其实该数组的两个元素分别对应于两个年份）
-    // 和前面 ☝️ 设置横坐标轴的比例尺的定义域时所绑定的数据一致
-    .data([0, 1])
+    // 先使用 D3 的内置方法 d3.group(iterable, ...keys) 对可迭代对象的元素进行分组转换
+    // 这里是基于生存时长 d => d.year 对数据集 data 的元素进行分组
+    // 共有 4 个生存时长类别，它们分别绑定一个 <g> 容器
+    // InterMap 对象的每个映射绑定到相应的元素上时，会变成一个二元数组，第一个元素是键名（即生存时长），第二个元素是一个数组，由原数据集中属于该生存时长的数据点组成
+    .data(d3.group(data, d => d.year))
     .join("g") // 将容器添加到页面上
     // 通过设置 CSS 的 transform 属性将不同的容器「移动」到相应的位置
-    // 基于绑定数据 i（这里用符号 i 表示，因为所绑定的数组的元素和它的索引值一样）再通过横坐标轴比例尺 x(i) 进行映射，得到相应的横坐标值，还要设置一小段间距，让标签（容器）与折线有一定的距离，以避免重叠
-    // 基于所绑定的数据 i 来设置间距的值，如果不为 0（绑定的是数组的第二个元素，对应于 1979 年的标签），则标签（容器）位于斜率图的右侧，则间距值为 padding（正数），即容器再向右移动一小段距离；如果为 0（绑定的是数组的第一个元素，对应于 1970 年的标签），则标签（容器）位于斜率图的左侧，则间距值为 -padding（负数），即容器再向左移动一小段距离
-    // 而纵坐标值都是 0（不在纵轴方向上移动）
-    .attr("transform", (i) => `translate(${x(i) + (i ? padding : -padding)},0)`)
+    // 解构出所绑定数据（一个二元数组）的第一个元素 step 生存时长，再通过横坐标轴比例尺 x(step) 进行映射，得到相应的横坐标值
+    // 如果生存时长是最短的 `5 Year` 或最长的 `20 Year` 还要设置一小段间距
+    // 这两类标签是定位到折线的左右两端，要与折线有一定的距离，以避免重叠（而其他生存时长的标签就直接与折线重叠）
+    .attr("transform", ([step]) => `translate(${x(step) + (
+      step === "20 Year" ? padding // 位于右端的标签，则设置间距值为 padding（正数），即容器再向右移动一小段距离
+        : step === "5 Year" ? -padding // 位于左端的标签，则设置间距值为 -padding（负数），即容器再向左移动一小段距离
+          : 0 // 其他标签，不设置偏移
+    )},0)`)
     // 设置标签文本的对齐方式
-    .attr("text-anchor", (i) => i ? "start" : "end")
+    .attr("text-anchor", ([step]) =>
+      step === "5 Year" ? "end" // 位于左端的标签，文本的结束对齐
+        : step === "20 Year" ? "start" // 位于右侧的标签，文本的开头对齐
+          : "middle") // 其他标签，居中对齐
     // 进行二次选择，在各个容器内添加一系列的 <text> 元素，以添加文本标注
     .selectAll("text")
     // ⚠️ 使用 select.selectAll() 所创建的新选择集会有多个分组
@@ -188,29 +200,35 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     // * 当前所遍历的分组的索引 index
     // * 选择集的所有父节点 parent nodes
     // 详细介绍可以查看笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-binding#绑定数据
-    // 这里入参 i 就是该分组绑定的数据（共有 2 个分组，分别绑定的数据是 0 或 1）
-    // 然后基于 i 对数据集 data 进行转换，抽取出对应年份的数据（当 i=0 时，抽取出 1979 年的数据；当 i=1 则抽取 1970 年的数据）
+    // 这里入参是一个二元数组，并解构出其中的元素 [step, values]
+    // 第一个元素 step 是生存时长；第二个元素 values 是一个数组，由原数据集 data 中属于该生存时长类别的数据点组成
     // 使用方法 d3.zip(arr1️⃣, arr2️⃣, ...) 对输入一系列的数组 arr1️⃣、arr2️⃣ ... 实现类似矩阵转置的功能
     // 即依次提取各数组的第 i 个元素，将它们构成新数组，然后再将这些数组作为元素，组合成一个新的数组（一个嵌套数组）
     // 具体可以参考官方文档 https://d3js.org/d3-array/transform#zip
     // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process
-    // 1️⃣ 这里传入的第一个参数是基于数据集 data 生成的一个数组
-    // data.map(i ? (d) => `${formatNumber(d[1979])} ${d.country}` : (d) => `${d.country} ${formatNumber(d[1970])}`)
-    // 方法 data.map(func) 让数组中的每个元素依次调用处理函数 func，并将函数的返回值构成一个新的数组
-    // 这里会基于当前（选择集）分组所绑定的数据 i 的不同，而对 data 的每个元素采用不同的转换方式（生成不同格式的字符串）
-    // 当 i=0 时，抽取出 1979 年的数据 d[1979] 并用数值格式器 formatNumber(d[1979]) 调整精度，然后加上当前所遍历的元素所属的国家名称
-    // 当 i=1 时，则是先写出当前所遍历的元素所属的国家名称，再加上 1970 年的数据 d[1970] 并用数值格式器 formatNumber(d[1970]) 调整精度
-    // 2️⃣ 这里传入的第二个参数也是基于数据集 data 生成的另一个数组
-    // dodge(data.map(d => y(d[i ? 1979 : 1970])))))
-    // 首先使用方法 data.map(func) 对数据集 data 进行转换，在每个元素执行处理函数中，调用了纵坐标轴比例尺 y(d[?]) 将当前所遍历的元素/国家（相应年份的）GDP 占比值映射为纵坐标轴的值（当 i=0 时映射 1970 年数据；当 i=1 时映射 1979 年数据），作为标签在纵轴方向的定位
-    // ⚠️ 因为不同国家在同一年份的数据 d 可能相同或相近，如果将比例尺 y(d) 映射所得的值直接作为这些标签的纵轴坐标值，那么它们就可能重叠
+    // 1️⃣ 这里传入的第一个参数是基于数组 values 生成的一个数组
+    // values.map(
+    //     step === "20 Year" ? (d) => `${formatNumber(d.survival)} ${d.name}`
+    //     : step === "5 Year" ? (d) => `${d.name} ${formatNumber(d.survival)}`
+    //     : (d) => `${formatNumber(d.survival)}`),
+    // 方法 arr.map(func) 让数组中的每个元素依次调用处理函数 func，并将函数的返回值构成一个新的数组
+    // 这里会基于当前（选择集）分组所对应的 step 生存时长类型，对数组 values 采用不同的转换方式，将数组 values 中的每个元素（对象）变成字符串，作为标签的文本内容
+    // 当 step === "20 Year" 时，字符串的内容是用数值格式器 formatNumber() 调整精度的生存率 d.survial，然后加上当前所遍历的元素所属的癌症名称 d.name
+    // 当 step === "5 Year" 时，字符串的内容是当前所遍历的元素所属的癌症名称 d.name，再加上用数值格式器 formatNumber() 调整精度的生存率 d.survial
+    // 当 step 是其他值时，字符串的内容是用数值格式器 formatNumber() 调整精度的生存率 d.survial
+    // 2️⃣ 这里传入的第二个参数也是基于数组 values 生成的另一个数组
+    // dodge(values.map(d => y(d.survival)))
+    // 首先使用方法 values.map(func) 对数据集 data 进行转换，在每个元素执行处理函数中，调用了纵坐标轴比例尺 y(d.survival) 将当前所遍历的元素（生存率）映射为纵坐标轴的值，作为标签在纵轴方向的定位
+    // ⚠️ 因为不同癌症在特定的生存时长的概率可能相同或相近，如果将比例尺 y(d.survival) 映射所得的值直接作为这些标签的纵轴坐标值，那么它们就可能重叠
     // 所以这里还需要使用方法 dodge() 对布局定位进一步优化，以提高标签的视觉可视性
-    // 方法 dodge() 的具体代码看 👇 后面
     // 最后经过 d3.zip() 将数组 1️⃣ 和数组 2️⃣ 进行「整合」
     // 所以每个 <text> 元素所绑定的数据都是一个二元数组，第一个元素是字符串（从数组 1️⃣ 提取出来的），作为标注内容；第二个元素是数值（从数组 2️⃣ 提取出来的），用于在纵坐标轴上定位
-    .data((i) => d3.zip(
-      data.map(i ? (d) => `${formatNumber(d[1979])} ${d.country}` : (d) => `${d.country} ${formatNumber(d[1970])}`),
-      dodge(data.map(d => y(d[i ? 1979 : 1970])))))
+    .data(([step, values]) => d3.zip(
+      values.map(
+        step === "20 Year" ? (d) => `${formatNumber(d.survival)} ${d.name}`
+          : step === "5 Year" ? (d) => `${d.name} ${formatNumber(d.survival)}`
+            : (d) => `${formatNumber(d.survival)}`),
+      dodge(values.map(d => y(d.survival)))))
     .join("text") // 将 <text> 元素添加到页面上
     // 设置各个标注的定位
     // 只需要设置纵坐标值 y 即可（横坐标值都相同，在前面 ☝️由（标签所属的）容器进行统一定位）
@@ -218,7 +236,17 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     // 在纵轴方向上为文本设置一点小偏移
     .attr("dy", "0.35em")
     // 设置标注的文本内容
-    .text(([text]) => text);
+    .text(([text]) => text)
+    // 设置文字颜色（
+    .attr("fill", "currentColor")
+    // 设置文字的描边颜色为白色
+    .attr("stroke", "white")
+    // 设置文字描边的宽度为 5
+    .attr("stroke-width", 5)
+    // 设置文本的 fill 填充、stroke 描边、mark 标记的绘制顺序
+    // 这里是先绘制描边，然后再是填充，避免白色描边遮挡了黑色的字体
+    // 具体介绍查看 https://developer.mozilla.org/en-US/docs/Web/CSS/paint-order
+    .attr("paint-order", "stroke");
 });
 
 /**
@@ -253,7 +281,7 @@ function dodge(positions, separation = 10, maxiter = 10, maxerror = 1e-1) {
     // 遍历每个元素，对定位值进行调整
     for (let i = 1; i < n; ++i) {
       // 计算在 y 轴上定位相邻的两个标签的距离差值 delta
-      // 这里 positions[index[i]] 和 positions[index[i - 1]] 可以获取到在 y 轴上定位相邻的标签的纵坐标值，因为前面对 index 进行了排序
+      // 💡 这里 positions[index[i]] 和 positions[index[i - 1]] 可以获取到在 y 轴上定位相邻的标签的纵坐标值，因为前面对 index 进行了排序
       let delta = positions[index[i]] - positions[index[i - 1]];
       // 判断差值 delta 是否大于预设的距离 separation
       if (delta < separation) {
