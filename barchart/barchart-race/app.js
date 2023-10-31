@@ -211,7 +211,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   // 将离散的数据映射为不同的颜色
   // 在该示例中为不同的产业类别映射为不同的颜色
   // d3.schemeTableau10 是一个 Color Scheme
-  // 它是一个分类型 categorical 配色方案，由 Tableau 预选了 10 中色彩用于标识不同的类别
+  // 它是一个分类型 categorical 配色方案，由 Tableau 预选了 10 种色彩用于标识不同的类别
   // 它是一个包含 12 个元素的数组，每一个元素是一个色值字符串
   let color;
 
