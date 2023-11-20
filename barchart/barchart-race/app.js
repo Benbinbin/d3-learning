@@ -99,7 +99,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   const keyframes = []; // 容器是每一帧（对应于某个日期的数据）
   let ka, a, kb, b;
   // d3.pairs(iterable[, reducer]) 方法将相邻元素两两配对，生成一个新的数组
-  // 更多关于 d3.rollup() 方法的信息可以参考官方文档 https://github.com/d3/d3-array/#rollup 或笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#转换 的相关部分
+  // 更多关于 d3.pairs() 方法的信息可以参考官方文档 https://d3js.org/d3-array/transform#pairs 或笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#转换 的相关部分
   // 然后遍历所得的数组（每一个元素都是一个二维数组）
   // 并通过解构数组得到相应的数据
   // ka 是年份（日期对象），a 是该年份（分组）所对应的数据
