@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Line Chart Connected</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    svg {
+      border: 2px solid orange;
+    }
+
+    #container {
+      width: 100%;
+      height: 70vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="mx-auto my-6 p-4 text-center">
+    <h1 class="py-8 text-2xl font-bold">折线图展开动效</h1>
+    <p class="mx-auto py-2 max-w-prose text-left">这是对 Hannah Fairfield 的 <em><a href="http://www.nytimes.com/imagepages/2010/05/02/business/02metrics.html" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">驾驶习惯改变</a></em> 的折线图重制复现（不带注解）。该图描绘了每加仑汽油价格和人均驾驶英里数之间的关系，图中标注了「阿拉伯石油禁运」、「能源危机」和「历史最低油价」等重大事件如何影响这些指标。</p>
+    <p class="mx-auto py-2 max-w-prose text-left">经济学家长期研究的驾驶习惯与经济活动之间的关系。驾驶的增加通常对应着商业活动的增加，而减少则发生在经济低迷时期。但是在原折线的最后部分（见下图，2010 年附近），尽管经济产出已经反弹，但是美国人的驾驶量却比经济衰退开始前（2005
+    年）还少，这表明高油价或消费者偏好的变化可能正在影响我们对驾驶的热爱，所以该图的标题被命名为 "Driving Shifts Into Reverse"</p>
+    <p class="mx-auto py-2 max-w-prose text-left">可以参考 <a href="../../scatterplot/scatterplot-connected/index.html" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">另一个例子</a> ，它绘制的图是一样的，但是对代码进行了更高度的封装，便于复用</p>
+    <div class="py-2 text-sm flex flex-wrap justify-center items-center gap-4">
+      <a href="../../index.html" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">首页</a>
+      <a href="https://observablehq.com/@benbinbin/connected-scatterplot" target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">参考</a>
+      <a href="https://github.com/Benbinbin/d3-learning/tree/main/linechart/line-chart-connected/" target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">代码</a>
+      <a href="https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-line-chart#折线图展开动效" target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">笔记</a>
+    </div>
+  </div>
+  <div id="container" class="flex justify-center items-center"></div>
+  <script src="app.js"></script>
+</body>
+
+</html>

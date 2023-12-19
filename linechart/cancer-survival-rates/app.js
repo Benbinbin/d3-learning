@@ -237,7 +237,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     .attr("dy", "0.35em")
     // 设置标注的文本内容
     .text(([text]) => text)
-    // 设置文字颜色（
+    // 设置文字颜色
     .attr("fill", "currentColor")
     // 设置文字的描边颜色为白色
     .attr("stroke", "white")

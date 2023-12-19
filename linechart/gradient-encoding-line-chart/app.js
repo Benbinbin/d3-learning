@@ -208,8 +208,10 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   svg.append("path") // 使用路径 <path> 元素绘制折线
     // 绑定数据
     // 这里采用 selection.datum(value) 为选择集中的每个元素上绑定的数据（该选择集里只有一个 <path> 元素）
-    // ⚠️ 它与 selection.data(data) 不同，该方法不会将数组进行「拆解」，即这个方法不会进行数据链接计算并且不影响索引，不影响（不产生）enter 和 exit 选择集，而是将数据 value 作为一个整体绑定到选择的各个元素上，因此使用该方法选择集的所有 DOM 元素绑定的数据都一样
-    // 具体参考官方文档 https://d3js.org/d3-selection/joining#selection_datum 或 https://github.com/d3/d3-selection/tree/main#selection_datum
+    // ⚠️ 它与 selection.data(value) 不同，该方法不会将数组进行「拆解」
+    // 即这个方法不会进行数据与元素的一一链接计算，并且不影响索引，不影响（不产生）enter 和 exit 选择集
+    // 而是将数据 value 作为一个整体绑定到选择的各个元素上，因此使用该方法选择集的所有 DOM 元素绑定的数据都一样
+    // 具体参考官方文档 https://d3js.org/d3-selection/joining#selection_datum
     // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/module-api/d3-module-selection#绑定数据
     .datum(data)
     // 只需要路径的描边作为折线，不需要填充，所以属性 fill 设置为 none

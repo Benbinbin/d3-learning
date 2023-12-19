@@ -94,11 +94,11 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
     .call(d3.axisLeft(y).ticks(height / 40))
     // 删掉上一步所生成的坐标轴的轴线（它含有 domain 类名）
     .call(g => g.select(".domain").remove())
-    // 复制了一份刻度线，用以绘制图中纵向的网格参考线
+    // 复制了一份刻度线，用以绘制图中横向的参考线
     .call(g => g.selectAll(".tick line").clone()
       // 调整复制后的刻度线的终点位置（往右移动）
       .attr("x2", width - marginLeft - marginRight)
-      .attr("stroke-opacity", 0.1)) // 调小网格线的透明度
+      .attr("stroke-opacity", 0.1)) // 调小参考线的透明度
     // 为坐标轴添加额外信息名称（一般是刻度值的单位等信息）
     .call(g => g.append("text")
       // 将该文本移动到坐标轴的顶部（即容器的左上角）
