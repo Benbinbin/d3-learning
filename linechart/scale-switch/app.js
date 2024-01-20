@@ -223,6 +223,9 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   // 监听 <input type="radio"> 元素的 change 事件，更新折线图
   const radioButtons = document.querySelectorAll('input[type="radio"]');
 
+  /**
+   * 根据 yType 的值（纵坐标轴采用 yLinear 线性比例尺，还是选择 yLog 对数比例尺）更新折线图
+   */
   radioButtons.forEach(radioButton => {
     radioButton.addEventListener('change', function (event) {
       if (this.checked) {
