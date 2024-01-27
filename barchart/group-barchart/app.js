@@ -160,7 +160,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     .attr("transform", `translate(${marginLeft},0)`)
     // 纵轴是一个刻度值朝左的坐标轴
     // 并使用坐标轴对象的方法 axis.ticks() 设置坐标轴的刻度数量和刻度值格式
-    // 具体参考官方文档 https://d3js.org/d3-axis#axis_ticks 或 https://github.com/d3/d3-axis/blob/v3.0.0/README.md#axis_ticks
+    // 具体参考官方文档 https://d3js.org/d3-axis#axis_ticks
     // 其中第一个参数用于设置刻度数量，这里设置为 `null` 表示采用默认的刻度生成器
     // 而第二个参数用于设置刻度值格式，这里设置为 "s" 表示数值采用 SI-prefix 国际单位制词头，例如 k 表示千，M 表示百万
     // 具体参考 https://en.wikipedia.org/wiki/Metric_prefix
