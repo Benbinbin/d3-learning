@@ -67,6 +67,14 @@ d3.csv(
   // 需要检查一下数据解析的结果，可能并不正确，需要在后面的步骤里再进行相应的处理
   console.log(data);
 
+  // 该方法用于更改时间对象 Date 的年份，统一为 2000 年
+  // 因为横坐标轴的比例尺是使用 2000 年作为定义域范围的，所以这里将入参 date（时间对象 Date）的年份都改为 2000 年，便于将数据点映射到横坐标轴上
+  function intrayear(date) {
+    date = new Date(+date);
+    date.setUTCFullYear(2000);
+    return date;
+  }
+
   /**
    *
    * 构建比例尺
@@ -128,14 +136,22 @@ d3.csv(
     .attr("transform", `translate(0,${height - marginBottom})`)
     // 横轴是一个刻度值朝下的坐标轴
     .call(d3.axisBottom(x)
-      // 通过 axis.ticks(count, specifier) 设置刻度数量（参考值）和刻度值的格式
-      // 第一个参数是一个数值，用于设置刻度数量（这里设置的是预期值，并不是最终值，D3 会基于出入的数量进行调整，以便刻度更可视）
-      // 第二个参数是一个字符串，称为 specifier 格式化说明符，用于设置刻度值格式（由于横坐标轴采用时间比例尺，所以这里采用的是时间格式器的说明符）
+      // ⚠️ 在 D3 的示例代码中是通过 axis.ticks(count, specifier) 设置刻度数量（参考值）和刻度值的格式
+      // ⚠️ 第一个参数是一个数值，用于设置刻度数量（这里设置的是预期值，并不是最终值，D3 会基于出入的数量进行调整，以便刻度更可视）
+      // 在示例代码中该参数值是 width / 80 它基于页面的宽度计算出刻度数量的参考值，避免刻度过多导致刻度值重叠而影响图表的可读性
+      // ⚠️ 但是该方法用于生成时间轴的刻度依然不妥的，例如对于由月份构成的刻度，即使在较宽的页面，最多也只应有 12 个刻度线才合理
+      // ⚠️ 而使用方法 axis.ticks(count, specifier) 并不能对刻度数量进行精确的约束
+      // 💡 这里采用更佳的方法 axis.ticks(interval) 生成时间轴（刻度）
       // 具体参考官方文档 https://d3js.org/d3-axis#axis_ticks
-      // 关于时间格式化说明符 specifier 可以参考官方文档 https://d3js.org/d3-time-format 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#说明符
-      // 第一个参数 width / 80 是基于页面的宽度计算出刻度数量的参考值，避免刻度过多导致刻度值重叠而影响图表的可读性
-      // 第二个参数 "%B" 表示刻度值采用月份的全写
-      .ticks(width / 80, "%B")
+      // 参数 interval 是时距器，用于生成特定间距的时间
+      // 关于时距器的介绍，可以参考这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#时间边距计算器
+      // 这里使用一个 D3 内置的时距器 d3.utcHour 创建一个以小时为间距的 interval
+      .ticks(d3.utcMonth)
+      // 通过 axis.tickFormat(specifier) 设置刻度值的格式
+      // 参数 specifier 是时间格式器，将一个 Date 对象格式化 format 为字符串
+      // 关于时间格式器的介绍，可以参考这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#时间格式器
+      // 这里 "%B" 表示刻度值采用月份的全写，例如「二月」使用英文 February 来表示
+      .tickFormat(d3.utcFormat("%B"))
       // 将坐标轴的外侧刻度 tickSizeOuter 长度设置为 0（即取消坐标轴首尾两端的刻度）
       .tickSizeOuter(0));
 
@@ -162,7 +178,7 @@ d3.csv(
       .attr("x", 3) // 将文本向右边设置一点小偏移
       .attr("text-anchor", "start") // 设置文本的对齐方式
       .attr("font-weight", "bold") // 设置字体粗细
-      .text(data.y)); // 设置文本内容
+      .text("km²")); // 设置文本内容
 
   /**
   *
@@ -201,13 +217,7 @@ d3.csv(
     // 以避免折线「锋利」交接处过渡延伸，导致该点的数据偏移
     .attr("stroke-miterlimit", 1);
 
-  // 该方法用于更改时间对象 Date 的年份，统一为 2000 年
-  // 因为横坐标轴的比例尺是使用 2000 年作为定义域范围的，所以这里将入参 date（时间对象 Date）的年份都改为 2000 年，便于将数据点映射到横坐标轴上
-  function intrayear(date) {
-    date = new Date(+date);
-    date.setUTCFullYear(2000);
-    return date;
-  }
+
 
   function dashTween() {
     const length = this.getTotalLength();

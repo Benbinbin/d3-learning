@@ -181,7 +181,7 @@ d3.tsv(dataURL, d3.autoType).then((rawData) => {
     .attr("transform", `translate(${margin.left},0)`)
     // 纵轴是一个刻度值朝左的坐标轴
     .call(d3.axisLeft(y)
-      // 纵坐标是时间比例尺，通过 axis.ticks(interval) 生成时间轴
+      // 纵坐标是时间比例尺，通过 axis.ticks(interval) 生成时间轴（刻度）
       // 具体参考官方文档 https://d3js.org/d3-axis#axis_ticks
       // 参数 interval 是时距器，用于生成特定间距的时间
       // 关于时距器的介绍，可以参考这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#时间边距计算器
