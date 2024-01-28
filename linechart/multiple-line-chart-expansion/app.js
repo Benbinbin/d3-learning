@@ -10,6 +10,7 @@ const container = document.getElementById("container"); // 图像的容器
 // 设置一些关于尺寸的参数
 // 获取尺寸大小
 const width = container.clientWidth; // 宽度
+console.log(width);
 const height = container.clientHeight; // 高度
 // margin 为前缀的参数
 // 其作用是在 svg 的外周留白，构建一个显示的安全区，以便在四周显示坐标轴
@@ -140,13 +141,14 @@ d3.csv(
       // ⚠️ 第一个参数是一个数值，用于设置刻度数量（这里设置的是预期值，并不是最终值，D3 会基于出入的数量进行调整，以便刻度更可视）
       // 在示例代码中该参数值是 width / 80 它基于页面的宽度计算出刻度数量的参考值，避免刻度过多导致刻度值重叠而影响图表的可读性
       // ⚠️ 但是该方法用于生成时间轴的刻度依然不妥的，例如对于由月份构成的刻度，即使在较宽的页面，最多也只应有 12 个刻度线才合理
-      // ⚠️ 而使用方法 axis.ticks(count, specifier) 并不能对刻度数量进行精确的约束
-      // 💡 这里采用更佳的方法 axis.ticks(interval) 生成时间轴（刻度）
+      // ⚠️ 而使用方法 axis.ticks(count) 并不能对刻度数量进行精确的约束
+      // 💡 这里可以采用 count 和 interval 混合的方案
+      // 💡 在小尺寸页面 width < 1024px 时，采用 axis.ticks(count) 基于页面宽度计算出可读书了的参考值；在大尺寸页面 width >= 1024px 时，采用 axis.ticks(interval) 更佳，根据时间间隔进行采样，生成更合理的刻度数量
       // 具体参考官方文档 https://d3js.org/d3-axis#axis_ticks
       // 参数 interval 是时距器，用于生成特定间距的时间
       // 关于时距器的介绍，可以参考这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#时间边距计算器
-      // 这里使用一个 D3 内置的时距器 d3.utcHour 创建一个以小时为间距的 interval
-      .ticks(d3.utcMonth)
+      // 这里使用一个 D3 内置的时距器 d3.utcMonth 创建一个以月份为间距的 interval
+      .ticks(width < 1024 ? width/80 : d3.utcMonth)
       // 通过 axis.tickFormat(specifier) 设置刻度值的格式
       // 参数 specifier 是时间格式器，将一个 Date 对象格式化 format 为字符串
       // 关于时间格式器的介绍，可以参考这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#时间格式器
