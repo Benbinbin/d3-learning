@@ -88,6 +88,7 @@ d3.csv(
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#时间比例尺-time-scales
   const x = d3.scaleUtc(
     // 设置定义域范围，构建一个数组，表示时间范围是 2000 年
+    // 这里的年份是可以任意挑选的，只要定义域范围是一年（即包含 12 个月即可）
     [Date.UTC(2000, 0, 1), Date.UTC(2001, 0, 0)],
     // 设置值域范围（所映射的可视元素）
     // svg 元素的宽度（减去留白区域）
@@ -218,8 +219,6 @@ d3.csv(
     // 如果在绘制折线图时数据点较多，可以将元素 `<path>` 的属性 `stroke-miterlimit` 设置为 `1`
     // 以避免折线「锋利」交接处过渡延伸，导致该点的数据偏移
     .attr("stroke-miterlimit", 1);
-
-
 
   function dashTween() {
     const length = this.getTotalLength();
