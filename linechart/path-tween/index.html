@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Path tween</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    svg {
+      border: 2px solid orange;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="mx-auto my-6 text-center">
+    <h1 class="py-8 text-2xl font-bold">路径切换补间动画</h1>
+    <p class="mx-auto py-2 max-w-prose text-left">该示例演示了如何使用 SVG <path> 元素的<a href="https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__getPointAtLength" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">属性 <code>getPointAtLength</code></a> 对路径进行插值，以创建路径切换的补间动画。</p>
+    <p class="mx-auto py-2 max-w-prose text-left">为了便于插值，对（过渡开始时的）source path 原始路径和（过渡结束时的）target path 目标路径进行均匀采样（可配置采样的精度，此处为 4px），在过渡期间将曲线替换为分段的 linear curve
+    线性曲线（实际是将采样所得的相邻数据点相连，形成一系列的线段）或 <em>polyline 折线</em>。过渡完成后，再将 <code><path></code> 恢复为原始的三次贝塞尔曲线。</p>
+    <p class="mx-auto py-2 max-w-prose text-left">这种实现路径切换补间动画的方法通用性很强，它适用于任何类型的路径（无论是曲线还是折线，只要路径可以通过 <code><path></code> 元素的属性 <code>d</code> 来表示即可）。</p>
+    <div class="py-2 text-sm flex flex-wrap justify-center items-center gap-4">
+      <a href="../../index.html" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">首页</a>
+      <a href="https://observablehq.com/@benbinbin/path-tween" target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">参考</a>
+      <a href="https://github.com/Benbinbin/d3-learning/tree/main/linechart/path-tween/" target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">代码</a>
+      <a href="https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-line-chart#路径切换补间动画" target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">笔记</a>
+    </div>
+  </div>
+  <div id="container" class="flex justify-center items-center"></div>
+  <script src="app.js"></script>
+</body>
+
+</html>

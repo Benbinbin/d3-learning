@@ -285,7 +285,7 @@ function transitionGrouped() {
   // 通过 selection.transition() 创建过渡管理器（在以下代码中 rect 变量就是条形图中包含所有 <rect> 元素的选择集）
   // 过渡管理器和选择集类似，有相似的方法，例如为选中的 DOM 元素设置样式属性
   // 使用 d3-transition 模块
-  // 具体参考官方文档 https://d3js.org/d3-transition 或 https://github.com/d3/d3-transition
+  // 具体参考官方文档 https://d3js.org/d3-transition
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-transition
   rect.transition()
     .duration(500) // 过渡时长为 500ms
