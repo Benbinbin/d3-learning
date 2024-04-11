@@ -145,8 +145,8 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     // 各系列的名称，即 9 个年龄段
     .domain(series.map(d => d.key))
     // 设置值域范围
-    // 使用 D3 内置的一种颜色比例尺 d3.schemeSpectral
-    // 它是一个数组，包含一些预设的配色方案
+    // 使用 D3 内置的一种配色方案 d3.schemeSpectral
+    // 它是一个数组，包含一些预设的颜色
     // 通过 d3.schemeSpectral[k] 的形式可以快速获取一个数组，其中包含 k 个元素，每个元素都是一个表示颜色的字符串
     // 其中 k 需要是 3~11 （包含）之间的数值
     // 具体参考官方文档 https://d3js.org/d3-scale-chromatic/diverging#schemeSpectral 或 https://github.com/d3/d3-scale-chromatic/tree/main#schemeSpectral
