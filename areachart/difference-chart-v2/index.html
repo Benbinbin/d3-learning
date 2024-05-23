@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Difference Chart - v2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    svg {
+      border: 2px solid orange;
+    }
+
+    #container {
+      width: 100%;
+      height: 70vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="mx-auto my-6 text-center">
+    <h1 class="py-8 text-2xl font-bold">差异图-v2</h1>
+    <p>下图显示纽约和三藩市的温度差异；当三藩市的温度更高的日子面积标为<span class="mx-1 rounded bg-orange-100 px-1 py-0.5 font-bold text-orange-500">橙色</span>，当三藩市的温度更低的日子面积标为<span class="mx-1 rounded bg-blue-100 px-1 py-0.5 font-bold text-blue-500">蓝色</span></p>
+    <div class="py-2 text-sm flex flex-wrap justify-center items-center gap-4">
+      <a href="../../index.html"
+        class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">首页</a>
+      <a href="https://observablehq.com/@benbinbin/difference-chart" target="_blank"
+        class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">参考</a>
+      <a href="https://github.com/Benbinbin/d3-learning/tree/main/areachart/difference-chart/" target="_blank"
+        class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">代码</a>
+      <a href="https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-area-chart#差异图"
+        target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">笔记</a>
+    </div>
+    <div class="m-4">
+      <p class="p-4 rounded mx-auto bg-amber-100 text-amber-600">这是代码简化版本，原始版本可以查看 <a href="../difference-chart/index.html" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">difference-chart</a>，最终渲染生成的可视化图形是相同的</p>
+    </div>
+  </div>
+  <div id="container" class="flex justify-center items-center"></div>
+  <script src="app.js"></script>
+</body>
+
+</html>
