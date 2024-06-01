@@ -3,6 +3,7 @@
     "areachart",
     "barchart",
     "Scatterplot",
+    "Streamgraph",
     "voronoi",
     "zoomable"
   ]

@@ -98,10 +98,16 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     .range([marginLeft, width - marginRight]);
 
   // 设置纵坐标轴的比例尺
-  // 纵坐标轴的数据是连续型的数值（失业人数），使用 d3.scaleLinear 构建一个线性比例尺
+  // 纵坐标轴的数据是连续型的数值（与失业人数相关），使用 d3.scaleLinear 构建一个线性比例尺
   const y = d3.scaleLinear()
-    .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
-    .rangeRound([height - marginBottom, marginTop]);
+      // 设置定义域范围 [0, ymax]
+      // 定义域最小值是 0；最大值是 series 中各系列上界的最大值的最大那个
+      // 由于 series 是嵌套数组，所以使用两次 d3.max() 方法来获取最大值，并且只需要考虑上界，所以这里只需要读取上界数据 d[1]）
+      .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
+      // 设置值域范围（所映射的可视元素）
+      // 使用 scale.rangeRound() 方法，可以进行修约，以便实现整数映射到整数（像素）
+      // svg 元素的宽度（减去留白区域）
+      .rangeRound([height - marginBottom, marginTop]);
 
   // 设置颜色比例尺
   // 为不同系列设置不同的配色
@@ -194,7 +200,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     // 所以调用面积生成器 area 返回的结果是字符串
     // 该值作为 `<path>` 元素的属性 `d` 的值
     .attr("d", area)
-    // 最后在每个路径元素 <rect> 里添加一个 <title> 元素
+    // 最后在每个路径元素 <path> 里添加一个 <title> 元素
     // 以便鼠标 hover 在相应的各系列的面积之上时，可以显示 tooltip 提示信息
     .append("title")
     // 设置 tooltip 的文本内容 d.key 表示当前所遍历的系列名称
