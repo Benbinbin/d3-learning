@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ridgeline plot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    svg {
+      border: 2px solid orange;
+    }
+
+    #container {
+      width: 100%;
+      height: 70vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="mx-auto my-6 text-center">
+    <h1 class="py-8 text-2xl font-bold">山脊线图</h1>
+    <div class="py-2 text-sm flex flex-wrap justify-center items-center gap-4">
+      <a href="../../index.html"
+        class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">首页</a>
+      <a href="https://observablehq.com/@benbinbin/ridgeline-plot" target="_blank"
+        class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">参考</a>
+      <a href="https://github.com/Benbinbin/d3-learning/tree/main/areachart/ridgeline-plot/" target="_blank"
+        class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">代码</a>
+      <a href="https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-area-chart#山脊线图"
+        target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">笔记</a>
+    </div>
+  </div>
+  <div id="container" class="flex justify-center items-center"></div>
+  <script src="app.js"></script>
+</body>
+
+</html>

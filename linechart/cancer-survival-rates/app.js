@@ -141,7 +141,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     // 第二个参数 ...keys 是一系列返回分组依据的函数，数据集中的每个元素都会调用该函数，入参就是当前遍历的元素 d
     // 并返回一个 InterMap 对象（映射，键名是分组依据，相应的值是在原始数组中属于该分组的元素）
     // 具体可以参考官方文档 https://d3js.org/d3-array/group#group
-    // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#转换
+    // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#分组
     // 在这里是基于癌症的名称 d => d.name 对数据集 data 的元素进行分组
     // 共有 24 个癌症类别，它们分别绑定一个 <path> 元素
     // InterMap 对象的每个映射绑定到相应的元素上时，会变成一个二元数组，第一个元素是键名（即癌症的名称），第二个元素是一个数组，由原数据集中属于该癌症类别的数据点组成

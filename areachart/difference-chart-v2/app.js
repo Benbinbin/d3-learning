@@ -79,8 +79,8 @@ d3.tsv(dataURL, d => ({
    *
    */
   // 设置横坐标轴的比例尺
-  // 横坐标轴的数据是日期（时间），使用 d3.scaleUtc 构建一个时间比例尺（连续型比例尺的一种）
-  // 该时间比例尺采用协调世界时 UTC，处于不同时区的用户也会显示同样的时间
+  // 横坐标轴的数据是日期（时间），使用 d3.scaleTime 构建一个时间比例尺（连续型比例尺的一种）
+  // 该时间比例尺采用地方时，处于不同时区的用户也会显示不同的时间
   // 具体可以参考官方文档 https://d3js.org/d3-scale/time
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#时间比例尺-time-scales
   const x = d3.scaleTime()
