@@ -1,31 +1,16 @@
 // 参考自 https://observablehq.com/@d3/ridgeline-plot
 
-/**
- *
- * 构建 svg
- *
- */
+// 获取容器，在其中添加 svg 元素
 const container = document.getElementById("container"); // 图像的容器
-
 // 获取尺寸大小
 const width = container.clientWidth; // 宽度
-const height = container.clientHeight; // 高度
+
 // margin 为前缀的参数
 // 其作用是在 svg 的外周留白，构建一个显示的安全区，以便在四周显示坐标轴
 const marginTop = 40;
 const marginRight = 20;
 const marginBottom = 30;
 const marginLeft = 120;
-
-// 创建 svg
-// 在容器 <div id="container"> 元素内创建一个 SVG 元素
-// 返回一个选择集，只有 svg 一个元素
-const svg = d3
-  .select("#container")
-  .append("svg")
-  .attr("width", width)
-  .attr("height", height)
-  .attr("viewBox", [0, 0, width, height]);
 
 /**
  *
@@ -79,6 +64,25 @@ d3.csv(dataURL, d3.autoType).then((traffic) => {
     // 属性 values 是基于数组 dates 去读取当前地点在相应时间的车流量，这样就可以构建出一个仅含有车流量的数组（且它们是按照时间先后顺序排列）
     return {name, values: dates.map(d => value.get(d))};
   });
+
+
+  /**
+   *
+   * 创建 svg
+   *
+   */
+  // svg 元素的高，根据系列的数量 * 每个系列的高度（像素）计算得出
+  const height = series.length * 17;
+
+  // 在容器 <div id="container"> 元素内创建一个 SVG 元素
+  // 返回一个选择集，只有 svg 一个元素
+  const svg = d3
+  .select("#container")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height)
+  .attr("viewBox", [0, 0, width, height]);
+
 
   /**
    *
@@ -149,23 +153,23 @@ d3.csv(dataURL, d3.autoType).then((traffic) => {
       .ticks(width / 80)
       // 而且将坐标轴的外侧刻度 tickSizeOuter 长度设置为 0（即取消坐标轴首尾两端的刻度）
       .tickSizeOuter(0));
-// 💡 注意以上使用的是方法 selection.call(axis) 的方式来调用坐标轴对象（方法）
-// 会将选择集中的元素 <g> 传递给坐标轴对象的方法，作为第一个参数
-// 以便将坐标轴在相应容器内部渲染出来
-// 具体参考官方文档 https://d3js.org/d3-selection/control-flow#selection_call
-// 或这一篇文档 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-binding#其他方法
+  // 💡 注意以上使用的是方法 selection.call(axis) 的方式来调用坐标轴对象（方法）
+  // 会将选择集中的元素 <g> 传递给坐标轴对象的方法，作为第一个参数
+  // 以便将坐标轴在相应容器内部渲染出来
+  // 具体参考官方文档 https://d3js.org/d3-selection/control-flow#selection_call
+  // 或这一篇文档 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-binding#其他方法
 
-// 绘制纵坐标轴
-svg.append("g")
-  // 通过设置 CSS 的 transform 属性将纵向坐标轴容器「移动」到左侧
-  .attr("transform", `translate(${marginLeft},0)`)
-  // 纵轴是一个刻度值朝左的坐标轴
-  // 通过 axis.ticks(count) 设置刻度数量的参考值（避免刻度过多导致刻度值重叠而影响图表的可读性）
-  // 而且将坐标轴的刻度 tickSize 长度设置为 0（即取消坐标轴的刻度线）
-  // 并将刻度值与轴线的距离 tickPadding 设置为 4px
-  .call(d3.axisLeft(y).tickSize(0).tickPadding(4))
-  // 删掉上一步所生成的坐标轴的轴线（它含有 domain 类名）
-  .call(g => g.select(".domain").remove());
+  // 绘制纵坐标轴
+  svg.append("g")
+    // 通过设置 CSS 的 transform 属性将纵向坐标轴容器「移动」到左侧
+    .attr("transform", `translate(${marginLeft},0)`)
+    // 纵轴是一个刻度值朝左的坐标轴
+    // 通过 axis.ticks(count) 设置刻度数量的参考值（避免刻度过多导致刻度值重叠而影响图表的可读性）
+    // 而且将坐标轴的刻度 tickSize 长度设置为 0（即取消坐标轴的刻度线）
+    // 并将刻度值与轴线的距离 tickPadding 设置为 4px
+    .call(d3.axisLeft(y).tickSize(0).tickPadding(4))
+    // 删掉上一步所生成的坐标轴的轴线（它含有 domain 类名）
+    .call(g => g.select(".domain").remove());
 
   /**
    *
