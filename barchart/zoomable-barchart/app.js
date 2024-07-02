@@ -9,10 +9,13 @@ function zoom(svg) {
     // 传入的是原始的横坐标 d 通过缩放变换对象处理，返回变换后的坐标
     // 所以 [xmin, xmax].map(d => event.transform.applyX(d)) 是基于原来的横轴值域，求出缩放变换后的新值域
     // 然后修改横坐标轴的比例尺的值域 x.range([newXmin, newXmax])
+    // 💡 缩放时，值域与定义域的映射关系就改变了（页面上原来的某个位置对应于某个数据量的关系不成立了），需要更新比例尺，可以考虑改变值域（这里就是手动改变值域），也可以考虑改变定义域
+    // 💡 其实 D3 提供了更简单的方法 transform.rescaleX(x) 或 transform.rescaleY(y)（通过改变定义域）更新比例尺
+    // 💡 关于方法 transform.rescaleX(x) 或 transform.rescaleY(y) 的介绍可以参考这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-interact#缩放变换对象的方法
     x.range(
       [margin.left, width - margin.right].map((d) => event.transform.applyX(d))
     );
-    // s使用新的比例尺调整条形图的柱子的定位（通过改变柱子的左上角的 x 值）
+    // 使用新的比例尺调整条形图的柱子的定位（通过改变柱子的左上角的 x 值）
     // 以及调整条形图的柱子的宽度，通过新的比例尺 x.bandwidth() 获取
     svg
       .selectAll(".bars rect")
