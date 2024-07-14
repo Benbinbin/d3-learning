@@ -484,7 +484,7 @@ d3.json(dataURL).then((data) => {
     .append("rect")
     .attr("class", "background") // 为元素添加 background 类名
     .attr("fill", "none")
-    // 因为上一步将 <rect> 矩形元素的填充元素设置为 none 所以需要设置  pointer-events
+    // 因为上一步将 <rect> 矩形元素的填充元素设置为 none 所以需要设置 pointer-events
     // 通过设置 CSS 属性 pointer-events 为 all 使 svg 元素会成为鼠标事件的目标
     // 即使 fill 属性设置为 none 也不影响事件处理（属性 stroke 和 visibility 也不影响）
     .attr("pointer-events", "all") // 让矩形元素允许所有的点击事件
