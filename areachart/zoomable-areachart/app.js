@@ -94,7 +94,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
       // 通过设置 CSS 的 transform 属性将横坐标轴容器「移动」到底部
       .attr("transform", `translate(0,${height - marginBottom})`)
       // 通过 selection.call(axis) 的方式来调用函数
-      // 会将选择集中的元素 <g> 传递给函数，作为第一个参数
+      // 会将选择集（只包含一个元素 <g>）传递给函数，作为第一个参数
       // 具体参考官方文档 https://d3js.org/d3-selection/control-flow#selection_call
       // 或这一篇文档 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-binding#其他方法
       .call(xAxis, x);
@@ -236,7 +236,7 @@ const path = svg.append("path") // 使用路径 <path> 元素绘制面积形状
     .transition()
       .duration(750) // 设置过渡持续时间
       // 设置初始缩放状态
-      // 💡 transition.call(function[, arguments…]) 执行一次函数 function 它其实和ff selection.call() 方法类似
+      // 💡 transition.call(function[, arguments…]) 执行一次函数 function 它其实和 selection.call() 方法类似
       // 💡 而且将过渡管理器作为第一个入参传递给 function，而其他传入的参数 arguments... 同样传给 function
       // 💡 最后返回当前过渡管理器，这样是为了便于后续进行链式调用
       // 具体参考官方文档 https://d3js.org/d3-transition/control-flow#transition_call

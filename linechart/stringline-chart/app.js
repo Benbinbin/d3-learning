@@ -171,7 +171,7 @@ d3.tsv(dataURL, d3.autoType).then((rawData) => {
       .attr("dy", "0.35em")
       .text(d => d.name))
   // 💡 注意以上有多次通过 selection.call() 的方式来执行代码/调用函数
-  // 会将选择集中的元素 <g> 作为第一个参数传递给回调函数
+  // 会将选择集（只包含一个元素 <g>）作为第一个参数传递给回调函数
   // 具体参考官方文档 https://d3js.org/d3-selection/control-flow#selection_call 或 https://github.com/d3/d3-selection#selection_call
   // 或这一篇文档 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-binding#其他方法
 

@@ -96,7 +96,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
     // 删掉上一步所生成的坐标轴的轴线（它含有 domain 类名）
     .call(g => g.select(".domain").remove());
   // 💡 注意以上通过方法 selection.call(axis) 的方式来调用坐标轴对象（方法）
-  // 会将选择集中的元素 <g> 传递给坐标轴对象的方法，作为第一个参数
+  // 会将选择集（只包含一个元素 <g>）传递给坐标轴对象的方法，作为第一个参数
   // 以便将坐标轴在相应容器内部渲染出来
   // 具体参考官方文档 https://d3js.org/d3-selection/control-flow#selection_call 或 https://github.com/d3/d3-selection#selection_call
   // 或这一篇文档 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-binding#其他方法

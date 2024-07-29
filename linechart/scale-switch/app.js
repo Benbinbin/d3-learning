@@ -133,7 +133,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   // 💡 值得留意前面使用了方法 selection.call(func)
   // 💡 该方法会执行一次入参的函数 func，而且将选择集 selection 作为第一个入参传递给 func
   // 💡 这里传入的参数是坐标轴对象 axis
-  // 💡 所以坐标轴对象实际上也是一个方法，接受一个 SVG 元素 context（一般是一个 <g> 元素），将坐标轴在其内部渲染出来
+  // 💡 所以坐标轴对象实际上也是一个方法，接受一个 SVG 元素 context（一般只包含一个 <g> 元素），将坐标轴在其内部渲染出来
   // 💡 最后返回当前选择集，这样是为了便于后续进行链式调用
   // 💡 具体可以参考 https://github.com/d3/d3-selection#selection_call
   // 💡 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-binding#其他方法

@@ -110,7 +110,7 @@ function scatterPlot(
   // 构建出来的坐标轴对象 xAxis 和 yAxis 也是一个方法，它接受一个 SVG 元素 context，一般是一个 <g> 元素，如 xAxis(context) 和 yAxis(context) 将坐标轴在其内部渲染出来。构建出来的坐标轴是有一系列 SVG 元素构成
   // * 轴线由 <path> 路径元素构成，它带有类名 domain
   // * 刻度是和刻度值分别由元素 <line> 和 <text> 构成。每一刻度和相应的刻度值都包裹在一个 <g> 元素中，它带有类名 tick
-  // 💡 但是一般使用 selection.call(axis) 的方式来调用坐标轴对象（方法），其中 selection 是指选择集，一般是一个 <g> 元素；axis 是坐标轴对象。关于 selection.call() 方法具体可以参考 https://github.com/d3/d3-selection#selection_call
+  // 💡 但是一般使用 selection.call(axis) 的方式来调用坐标轴对象（方法），其中 selection 是指选择集（一般只包含一个 <g> 元素）；axis 是坐标轴对象。关于 selection.call() 方法具体可以参考 https://github.com/d3/d3-selection#selection_call
   // 💡 在构建坐标轴时，推荐为容器的四周设置一个 margin 区域（即封装方法的参数 marginTop、marginRight、marginBottom、marginLeft），以便放置坐标轴等注释信息，而中间的「安全区域」才放置主要的可视化图表内容
 
   // 使用选择集的方法 selection.attr() 为选择集中的所有元素（即 <svg> 元素）设置宽高和 viewBox 属性
