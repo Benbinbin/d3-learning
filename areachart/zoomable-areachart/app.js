@@ -158,7 +158,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
 (data);
 
 // 创建一个 identifier 唯一标识符（字符串）
-// 它会作为一些 <clipPath> 元素的 id 属性值（方便其他元素基于 id 来使用），以避免与其他元素发生冲突
+// 它会作为一些 <clipPath> 元素的 id 属性值（方便其他元素基于 id 来引用），以避免与其他元素发生冲突
 // 💡 在参考的 Observable Notebook 使用了平台的标准库所提供的方法 DOM.uid(namespace) 创建一个唯一 ID 号
 // 💡 具体参考官方文档 https://observablehq.com/documentation/misc/standard-library#dom-uid-name
 // 💡 方法 DOM.uid() 的具体实现可参考源码 https://github.com/observablehq/stdlib/blob/main/src/dom/uid.js
@@ -176,10 +176,10 @@ svg.append("clipPath")
 // 在其中添加 <rect> 子元素，以设置剪切路径的形状
 .append("rect")
   // 设置矩形的定位和尺寸
-  .attr("x", marginLeft) // 设置该元素的左上角的横坐标值（距离 svg 左侧 marginLeft 个像素大小）
+  .attr("x", marginLeft) // 设置该元素的左上角的横坐标值（距离 svg 左侧 marginLeft 个像素大小，空出/裁剪出左侧留白区域，避免面积图遮挡纵坐标轴）
   .attr("y", marginTop) // 设置该元素的左上角的纵坐标值（距离 svg 顶部 marginTop 个像素大小）
   .attr("width", width - marginLeft - marginRight) // 设置宽度（采用 svg 的宽度，并减去左右留白区域）
-  .attr("height", height - marginTop - marginBottom); // 设置宽度（采用 svg 的高度，并减去上下留白区域）
+  .attr("height", height - marginTop - marginBottom); // 设置高度（采用 svg 的高度，并减去上下留白区域）
 
 // 将面积形状绘制到页面上
 // 变量 path 是一个选择集，里面包含一个元素 <path>，它是绘制面积形状的元素

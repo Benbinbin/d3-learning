@@ -204,10 +204,10 @@ function scatterPlot(
   const brush = d3.brush().on("start brush end", brushed); // 监听刷选的全过程（刷选在不同过程会分发三个不同类型的事件），触发回调函数 brushed
 
   // 刷选发生时所触发的回调函数
-  // 其中只将入参的刷选事件对象解构出 selection 选区属性
+  // 从入参的刷选事件对象中解构出 selection 选区属性
   function brushed({ selection }) {
+    // 如果用户创建了选区
     if (selection) {
-      // 如果用户创建了选区
       const [[x0, y0], [x1, y1]] = selection; // 将选区解构出各个坐标值
       pointsContainer
         .selectAll("circle")
