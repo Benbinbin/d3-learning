@@ -271,7 +271,6 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
   // 刷选发生时（选区发生改变）所触发的回调函数
   // 从入参的刷选事件对象中解构出 selection 选区属性
   function brushed({selection}) {
-    console.log(selection);
     // 如果用户创建了选区
     if (selection) {
       // 选区 selection 是一个二元数组，其形式为 [x0, x1]，其中 x0, x1 分别表示选区两端的横坐标值
