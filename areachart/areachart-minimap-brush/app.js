@@ -150,7 +150,7 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
     // 设置上边界线的纵坐标的读取函数
     .y1(d => y(d.value));
 
-      /**
+  /**
    *
    * 主图
    *
