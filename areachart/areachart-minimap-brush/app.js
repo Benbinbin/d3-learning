@@ -150,6 +150,67 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
     // 设置上边界线的纵坐标的读取函数
     .y1(d => y(d.value));
 
+      /**
+   *
+   * 主图
+   *
+   */
+  const mainSvg = d3
+  .select("#mainContainer")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height)
+  .attr("viewBox", [0, 0, width, height]);
+
+  // 创建一个 identifier 唯一标识符（字符串）
+  // 它会作为一些 <clipPath> 元素的 id 属性值（方便其他元素基于 id 来引用），以避免与其他元素发生冲突
+  // 💡 在参考的 Observable Notebook 使用了平台的标准库所提供的方法 DOM.uid(namespace) 创建一个唯一 ID 号
+  // 💡 具体参考官方文档 https://observablehq.com/documentation/misc/standard-library#dom-uid-name
+  // 💡 方法 DOM.uid() 的具体实现可参考源码 https://github.com/observablehq/stdlib/blob/main/src/dom/uid.js
+  // const clip = DOM.uid("clip");
+  // 这里使用硬编码（手动指定）id 值
+  const clipId = "clipId";
+
+  // 创建一个元素 <clipPath> （一般具有属性 id 以便被其他元素引用）路径剪裁遮罩，其作用充当一层剪贴蒙版，具体形状由其包含的元素决定
+  // 💡 它不会直接在页面渲染出图形，而是被其他元素（通过设置属性 clip-path）引用的方式来起作用，为其他元素自定义了视口
+  // 这里在 <clipPath> 内部添加了一个 <rect> 设置剪裁路径的形状，以约束面积图容器的可视区域
+  // 则放大面积图时，超出其容器的部分就不会显示（避免遮挡坐标轴）
+  mainSvg.append("clipPath")
+      .attr("id", clipId) // 为 <clipPath> 设置属性 id
+    // 在其中添加 <rect> 子元素，以设置剪切路径的形状
+    .append("rect")
+      // 设置矩形的定位和尺寸
+      .attr("x", margin.left) // 设置该元素的左上角的横坐标值（距离 svg 左侧 marginLeft 个像素大小，空出/裁剪出左侧留白区域，避免面积图遮挡纵坐标轴）
+      .attr("y", 0) // 设置该元素的左上角的纵坐标值
+      .attr("height", height) // 设置高度
+      .attr("width", width - margin.left - margin.right); // 设置宽度（采用 svg 的宽度，并减去左右留白区域）
+
+  // 变量 path 是一个选择集，里面包含一个元素 <path>，它是绘制面积形状的元素
+  const path = mainSvg.append("path") // 使用路径 <path> 元素绘制面积形状
+    .datum(data) // 绑定数据
+    // 设置属性 clip-path 以采用前面预设的 <clipPath> 元素对图形进行裁剪/约束
+    .attr("clip-path", `url(#${clipId})`)
+    .attr("fill", "steelblue"); // 将面积的填充颜色设置为蓝色
+
+  // 变量 gx 是一个选择集，里面包含一个元素 <g> 作为横坐标轴的容器
+  const gx = mainSvg.append("g");
+
+  // 变量 gy 是一个选择集，里面包含一个元素 <g> 作为纵坐标轴的容器
+  const gy = mainSvg.append("g");
+
+  // 方法 update 用于更新主图，它接受两个参数
+  // * focusX 横坐标轴比例尺
+  // * focusY 纵坐标轴比例尺
+  function updateMain(focusX, focusY) {
+    // 在 gx 里绘制新的横坐标轴（D3 会自动复用必要的刻度元素，刷选时会呈现切换动效）
+    gx.call(xAxis, focusX, height);
+    // 在 gy 里绘制新的纵坐标轴（D3 会自动复用必要的刻度元素，刷选时会呈现切换动效）
+    gy.call(yAxis, focusY, data.y);
+    // 在 path 里绘制面积图形状
+    // 调用函数 area(data, x) 返回的结果是字符串，作为 `<path>` 元素的属性 `d` 的值
+    path.attr("d", area(focusX, focusY));
+  }
+
   /**
    *
    * 缩略图
@@ -196,8 +257,8 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
   // 使用 d3.utcYear 创建一个以年为间距的 interval，通过 interval.offset(date, step) 对入参的时间 date 进行偏移处理
   // 关于时距器的介绍可以参考官方文档 https://d3js.org/d3-time#interval_offset
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-data-process#时间修约
-  // 这里入参的时间是 x.domain()[-1] 横坐标轴比例尺的定义域的上界（数据集中的最后一年，即 2012 年）
-  // 然后 step=-1 表示向前调整一年，即 2011 年，再使用比例尺 x 进行映射，计算出选区的左侧端点
+  // 这里入参的时间是 x.domain()[-1] 横坐标轴比例尺的定义域的上界（数据集中的最后一个日期，即 2012-05-01）
+  // 然后 step=-1 表示向前调整一年，即 2011-05-01，再使用比例尺 x 进行映射，计算出选区的左侧端点
   // 而选区的右侧端点，采用比例尺 x 的值域上界 x.range()[1]，即横坐标轴的最右端
   // 所以默认选区是横跨最后一年
   const defaultSelection = [x(d3.utcYear.offset(x.domain()[1], -1)), x.range()[1]];
@@ -205,11 +266,12 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
   // 创建一个容器
   const gb = minimapSvg.append("g")
     .call(brush) // 将前面所创建的刷选器绑定到容器上
-    .call(brush.move, defaultSelection); // 操作刷选区，设置为默认选区
+    .call(brush.move, defaultSelection); // 初始化刷选区，设置为默认选区
 
-  // 刷选发生时所触发的回调函数
+  // 刷选发生时（选区发生改变）所触发的回调函数
   // 从入参的刷选事件对象中解构出 selection 选区属性
   function brushed({selection}) {
+    console.log(selection);
     // 如果用户创建了选区
     if (selection) {
       // 选区 selection 是一个二元数组，其形式为 [x0, x1]，其中 x0, x1 分别表示选区两端的横坐标值
@@ -217,8 +279,17 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
       // 通过 continue.invert(value) 将给定的值域的值 value（像素），反过来得到定义域的值（日期）
       // 💡 基于选区位置反过来求出的日期并不正好是一天的开始，但是原始数据集中日期都是按天计算的，可以进行修约处理（其实也没有必要 ❓ 由于面积图是连续型的）
       // 再使用 d3.utcDay 创建一个以天为间隔的 interval，通过 interval.round 对日期进行修约
-      // 为 minimapSvg 选择集中的元素（只包含一个 <svg> 元素）添加名为 value 的属性，如果选区为空，则该属性值为 [] 空数组；如果创建了选区，则该属性值为一个二元数组，表示选区两端所对应的日期
-      minimapSvg.property("value", selection.map(x.invert, x).map(d3.utcDay.round));
+      // 从选区提取出聚焦的时间段 focus
+      // 如果选区为空，则该变量值为 [] 空数组；如果创建了选区，则该变量值为一个二元数组，表示选区两端所对应的日期
+      const focus = selection.map(x.invert, x).map(d3.utcDay.round);
+
+      // 然后触发主图更新
+      // 从 focus 里解构出缩略图选区左右两端所对应日期，作为新的横坐标轴比例尺的定义域
+      const [minX, maxX] = focus;
+      // 获取日期从 minX 到 maxX 之间的数据点，并使用 d3.max() 获取其中的（股价）最大值，作为新的纵坐标轴比例尺的定义域的上界
+      const maxY = d3.max(data, d => minX <= d.date && d.date <= maxX ? d.value : NaN);
+      // 创建比例尺 x 和 y 的副本，并更新它们的定义域范围，再重新绘制以刷新主图
+      updateMain(x.copy().domain(focus), y.copy().domain([0, maxY]));
     }
   }
 
@@ -231,16 +302,4 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
       gb.call(brush.move, defaultSelection);
     }
   }
-
-  /**
-   *
-   * 主图
-   *
-   */
-  const mainSvg = d3
-    .select("#mainContainer")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("viewBox", [0, 0, width, height]);
 });

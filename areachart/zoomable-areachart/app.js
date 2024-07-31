@@ -185,7 +185,7 @@ svg.append("clipPath")
 // 变量 path 是一个选择集，里面包含一个元素 <path>，它是绘制面积形状的元素
 const path = svg.append("path") // 使用路径 <path> 元素绘制面积形状
   // 设置属性 clip-path 以采用前面预设的 <clipPath> 元素对图形进行裁剪/约束
-  .attr("clip-path", clipId)
+  .attr("clip-path", `url(#${clipId})`)
   .attr("fill", "steelblue") // 将面积的填充颜色设置为蓝色
   // 调用函数 area(data, x) 返回的结果是字符串，作为 `<path>` 元素的属性 `d` 的值
   .attr("d", area(data, x));
