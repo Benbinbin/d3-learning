@@ -192,22 +192,22 @@ const path = svg.selectAll("path") // 返回一个选择集，其中虚拟/占�
 // 执行无限循环，不断更新河流图的数据
 (async function () {
   while (true) {
-  // yield svg.node();
-  // 异步操作，在当前过渡完成时（Promise 才会 resolve），才会进入下一个循环周期（开始新一轮的过渡动画 ）
-  await path
-    .data(randomize) // 绑定新生成的数据集
-    // 设置过渡动效（通过更改 `<path>` 的属性 d 实现）
-    // 通过 selection.transition() 创建过渡管理器
-    // 过渡管理器和选择集类似，有相似的方法，例如为选中的 DOM 元素设置样式属性
-    // 具体参考官方文档 https://d3js.org/d3-transition
-    // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-transition
-    .transition()
-      .delay(1000) // 设置过渡的延迟/等待时间
-      .duration(1500) // 设置过渡的时间
-      // 重绘各堆叠的面积形状
-      .attr("d", area)
-    // 最后通过方法 transition.end() 返回一个 Promise，仅在过渡管理器所绑定的选择集合的所有过渡完成时才 resolve
-    // 这样就可以在当前的过渡结束时，才做执行后面操作（重复下一轮动画）
-    .end();
-}
+    // yield svg.node();
+    // 异步操作，在当前过渡完成时（Promise 才会 resolve），才会进入下一个循环周期（开始新一轮的过渡动画 ）
+    await path
+      .data(randomize) // 绑定新生成的数据集
+      // 设置过渡动效（通过更改 `<path>` 的属性 d 实现）
+      // 通过 selection.transition() 创建过渡管理器
+      // 过渡管理器和选择集类似，有相似的方法，例如为选中的 DOM 元素设置样式属性
+      // 具体参考官方文档 https://d3js.org/d3-transition
+      // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-transition
+      .transition()
+        .delay(1000) // 设置过渡的延迟/等待时间
+        .duration(1500) // 设置过渡的时间
+        // 重绘各堆叠的面积形状
+        .attr("d", area)
+      // 最后通过方法 transition.end() 返回一个 Promise，仅在过渡管理器所绑定的选择集合的所有过渡完成时才 resolve
+      // 这样就可以在当前的过渡结束时，才做执行后面操作（重复下一轮动画）
+      .end();
+  }
 })();
