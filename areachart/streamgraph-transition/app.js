@@ -181,7 +181,7 @@ const area = d3.area()
 const path = svg.selectAll("path") // 返回一个选择集，其中虚拟/占位元素是一系列的 <path> 路径元素，用于绘制各系列的形状
   .data(randomize) // 绑定数据，每个路径元素 <path> 对应一个系列数据
   .join("path") // 将元素绘制到页面上
-    // 由于面积生成器并没有调用方法 area.context(parentDOM) 设置画布上下文
+    // 由于面积生成器并没有调用方法 area.context(canvasContext) 设置画布上下文
     // 所以调用面积生成器 area 返回的结果是字符串
     // 该值作为 `<path>` 元素的属性 `d` 的值
     .attr("d", area)

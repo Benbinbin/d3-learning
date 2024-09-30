@@ -237,7 +237,7 @@ const dataURL =
     // 其中所绑定数据是一个数组，但具有属性 key 表示该系列对应的州的名称，填充色是由该州所属的区域所决定的
     // 首先通过映射 regionByState.get(key) 获取该州所对应的区域，然后使用颜色比例尺 color() 获取相应的颜色
     .attr("fill", ({key}) => color(regionByState.get(key)))
-    // 由于面积生成器并没有调用方法 area.context(parentDOM) 设置画布上下文
+    // 由于面积生成器并没有调用方法 area.context(canvasContext) 设置画布上下文
     // 所以调用面积生成器 area 返回的结果是字符串
     // 该值作为 `<path>` 元素的属性 `d` 的值
     .attr("d", area)

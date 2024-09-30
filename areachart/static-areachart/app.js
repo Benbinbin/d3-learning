@@ -135,7 +135,7 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
   svg.append("path") // 使用路径 <path> 元素绘制面积形状
     // 将面积的填充颜色设置为蓝色
     .attr("fill", "steelblue")
-    // 由于面积生成器并没有调用方法 area.context(parentDOM) 设置画布上下文
+    // 由于面积生成器并没有调用方法 area.context(canvasContext) 设置画布上下文
     // 所以调用面积生成器 area(aapl) 返回的结果是字符串
     // 该值作为 `<path>` 元素的属性 `d` 的值
     .attr("d", area(aapl));

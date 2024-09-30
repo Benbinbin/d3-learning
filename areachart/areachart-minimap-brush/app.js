@@ -237,7 +237,7 @@ d3.csv(dataURL, d3.autoType).then((aapl) => {
     // 再调用（自动传入选择集所绑定的数据）areaGenerator(data) 绘制面积形状
     // ⚠️ 由于比例尺 y 的值域采用主图的尺寸，所以需要进行调整
     // 这里使用方法 continuous.copy() 创建一个比例尺 y 的副本，然后再对该副本进行修改，并不影响原来的比例尺对象
-    // 由于面积生成器并没有调用方法 area.context(parentDOM) 设置画布上下文
+    // 由于面积生成器并没有调用方法 area.context(canvasContext) 设置画布上下文
     // 所以调用面积生成器 area(aapl) 返回的结果是字符串
     // 该值作为 `<path>` 元素的属性 `d` 的值
     .attr("d", area(x, y.copy().range([focusHeight - margin.bottom, 4])));
