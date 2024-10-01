@@ -19,6 +19,8 @@ const svg = d3
   .append("svg")
   .attr("width", width)
   .attr("height", height)
+  // 通过 viewBox 将视图区域向左移动 width/2 向上移动 height/2，让 (0, 0) 位于视图区域的中心
+  // 这样就可以让饼图的圆心位于视图中心
   .attr("viewBox", [-width / 2, -height / 2, width, height])
   .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
 
