@@ -1,4 +1,4 @@
-// 参考自 https://observablehq.com/@d3/pie-chart/2
+// 参考自 https://observablehq.com/@d3/donut-chart/2
 
 /**
  *
@@ -10,6 +10,9 @@ const container = document.getElementById("container"); // 图像的容器
 // 获取尺寸大小
 const width = container.clientWidth; // 宽度
 const height = container.clientHeight; // 高度
+// 该变量用于计算环形内外半径
+// 取宽度和高度两者之中较小值的一半
+const radius = Math.min(width, height) / 2;
 
 // 创建 svg
 // 在容器 <div id="container"> 元素内创建一个 SVG 元素
@@ -22,7 +25,7 @@ const svg = d3
   // 通过 viewBox 将视图区域向左移动 width/2 向上移动 height/2，让 (0, 0) 位于视图区域的中心
   // 这样就可以让饼图的圆心位于视图中心
   .attr("viewBox", [-width / 2, -height / 2, width, height])
-  .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
+  .attr("style", "max-width: 100%; height: auto;");
 
 /**
  *
@@ -30,7 +33,7 @@ const svg = d3
  * 再在回调函数中执行绘制操作
  *
  */
-// 数据来源网页 https://observablehq.com/@d3/pie-chart/2 的文件附件
+// 数据来源网页 https://observablehq.com/@d3/donut-chart/2 的文件附件
 const dataURL =
   "https://gist.githubusercontent.com/Benbinbin/434a8c4b67e5ed66958055928a7c7b34/raw/6b8baac8a108f25f6235de08a9003b131fdf3911/population-by-age.csv";
 
@@ -44,7 +47,7 @@ d3.csv(dataURL, d3.autoType).then((data) => {
    *
    */
   // 设置颜色比例尺
-  // 为不同扇形设置不同的配色
+  // 为不同环状扇形设置不同的配色
   // 使用 d3.scaleOrdinal() 排序比例尺 Ordinal Scales 将离散型的定义域映射到离散型值域
   // 具体参考官方文档 https://d3js.org/d3-scale/ordinal
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-scale#排序比例尺-ordinal-scales
@@ -83,19 +86,21 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   // 具体可以参考官方文档 https://d3js.org/d3-shape/pie
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-shape#pies-饼图角度生成器
   const pie = d3.pie()
-  // 设置数据项的排序对比函数（用于决定相应扇形的优先次序）
-  // 💡 此处所说的排序，实际上体现在各数据项所对应的扇形的起始角度和结束角度上，而不会改变数组中的元素的次序（经过排序后返回的数组的元素次序，和数据表中数据项的顺序是相同的）
-  // 虽然数据项的排序对比函数默认值就是 `null`，但是这里依然显式地将对比函数设置为 null
-  // 这是为了让 D3 隐式地调用 ` pie.sortValues(null)` 将数据项转换值的对比函数设置为 `null`（它的默认值是 `d3.descending` 降序排列），以忽略按数据项的转换值进角度排序
-  // 如果 `pie.sort` 数据项的对比函数 ，以及 `pie.sortValues` 它的转换值的对比函数都是 `null`，则各扇形的排序与原始数据集中各数据项顺序一致
-  // 所以最终各扇形是按照相应的数据项在原始数据集中的顺序进行排序（即年龄段从小到大进行排序，而不是按照人口占比的多少进行排序）
-  .sort(null)
-  // 设置 value accessor 数据访问器，即每个数据项经过该函数的转换后，再传递给 Pie 饼图角度生成器
-  .value(d => d.value);
+    // 💡 设置相邻环状扇形之间的间隔角，最终效果会在每个环状扇形之间有留白间隙（便于区分）
+    .padAngle(1 / radius)
+    // 设置数据项的排序对比函数（用于决定相应扇形的优先次序）
+    // 💡 此处所说的排序，实际上体现在各数据项所对应的扇形的起始角度和结束角度上，而不会改变数组中的元素的次序（经过排序后返回的数组的元素次序，和数据表中数据项的顺序是相同的）
+    // 虽然数据项的排序对比函数默认值就是 `null`，但是这里依然显式地将对比函数设置为 null
+    // 这是为了让 D3 隐式地调用 ` pie.sortValues(null)` 将数据项转换值的对比函数设置为 `null`（它的默认值是 `d3.descending` 降序排列），以忽略按数据项的转换值进角度排序
+    // 如果 `pie.sort` 数据项的对比函数 ，以及 `pie.sortValues` 它的转换值的对比函数都是 `null`，则各扇形的排序与原始数据集中各数据项顺序一致
+    // 所以最终各扇形是按照相应的数据项在原始数据集中的顺序进行排序（即年龄段从小到大进行排序，而不是按照人口占比的多少进行排序）
+    .sort(null)
+    // 设置 value accessor 数据访问器，即每个数据项经过该函数的转换后，再传递给 Pie 饼图角度生成器
+    .value(d => d.value);
 
-  // 调用饼图角度生成器，对原始数据集 data 进行转换处理
-  // 计算出每个数据点所对应的扇形的相关信息（主要是起始角和结束角）
-  const arcs = pie(data);
+  // // 调用饼图角度生成器，对原始数据集 data 进行转换处理
+  // // 计算出每个数据点所对应的扇形的相关信息（主要是起始角和结束角）
+  // const arcs = pie(data);
 
   /**
    *
@@ -104,14 +109,15 @@ d3.csv(dataURL, d3.autoType).then((data) => {
    */
   // 使用 d3.arc() 创建一个 arc 扇形生成器
   // 扇形生成器会基于给定的数据生成扇形形状
-  // 调用 扇形生成器时返回的结果，会基于生成器是否设置了画布上下文 context 而不同。如果设置了画布上下文 context，则生成一系列在画布上绘制路径的方法，通过调用它们可以将路径绘制到画布上；如果没有设置画布上下文 context，则生成字符串，可以作为 `<path>` 元素的属性 `d` 的值
+  // 调用扇形生成器时返回的结果，会基于生成器是否设置了画布上下文 context 而不同。如果设置了画布上下文 context，则生成一系列在画布上绘制路径的方法，通过调用它们可以将路径绘制到画布上；如果没有设置画布上下文 context，则生成字符串，可以作为 `<path>` 元素的属性 `d` 的值
   // 具体可以参考官方文档 https://d3js.org/d3-shape/arc
   // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-shape#扇形生成器-arcs
   const arc = d3.arc()
-      // 设置内半径，参数为 0 则生成扇形；如果参数不为 0 则生成环形
-      .innerRadius(0)
-      // 设置外半径，是 svg 宽或高（较短的一边为基准）的一半
-      .outerRadius(Math.min(width, height) / 2 - 1);
+      // 💡 设置内半径，由于这里所传递的参数不为 0，所以生成环状扇形（如果参数为 0 则生成完整扇形）
+      .innerRadius(radius * 0.67)
+      // 设置外半径
+      .outerRadius(radius - 1);
+  // 💡 环形的宽度就是内外半径之差 (radius - 1) - (radius * 0.67) = 0.33 * radius - 1
 
   // 将每个扇形的面积形状绘制到页面上
   // 创建一个元素 <g> 作为容器
@@ -119,7 +125,10 @@ d3.csv(dataURL, d3.autoType).then((data) => {
   svg.append("g")
       .attr("stroke", "white") // 每个扇形的描边为白色（便于区分）
     .selectAll() // 返回一个选择集，其中虚拟/占位元素是一系列的 <path> 路径元素，用于绘制各扇形的形状
-    .data(arcs) // 绑定数据，每个路径元素 <path> 对应一个扇形数据
+    // 绑定数据，每个路径元素 <path> 对应一个扇形数据
+    // 其中 pie(data) 是调用饼图角度生成器，对原始数据集 data 进行转换处理
+    // 计算出每个数据点所对应的扇形的相关信息（主要是起始角和结束角）
+    .data(pie(data))
     .join("path") // 将元素绘制到页面上
       // 设置颜色，不同扇形对应不同的颜色
       // 其中 d 是所绑定的数据，d.data 是原始数据点，所以 d.data.name 就是该扇形所对应的年龄段（名称）
@@ -140,31 +149,20 @@ d3.csv(dataURL, d3.autoType).then((data) => {
    * 添加标注信息
    *
    */
-  // 该变量表示每个扇形的标注文本相对于圆心的距离
-  // 是大饼图的外半径的 0.8 倍
-  // 相当于使用原始数据集，可以绘制出一个半径更小的饼图（用于定位标注文本），而它的各个扇形部分和大的饼图是一致的
-  const labelRadius = arc.outerRadius()() * 0.8;
-
-  // A separate arc generator for labels.
-  // 创建另一个 arc 扇形生成器，在后面 👇 会借助它计算出各扇形的中点位置
-  const arcLabel = d3.arc()
-      // 该饼图的内半径和外半径是一样的，所以小饼图相当于一个圆（只有圆周一圈，而没有面积）
-      // 所以在后面 👇 借助它计算各扇形的文本标注位置时，最终效果是将标注信息定位到该饼图的外周上
-      .innerRadius(labelRadius)
-      .outerRadius(labelRadius);
-
   // 为各扇形添加文本标注信息
   // 创建一个元素 <g> 作为容器
   // Create a new arc generator to place a label close to the edge.
   // The label shows the value if there is enough room.
   svg.append("g")
+      .attr("font-family", "sans-serif") //  设置字体家族
+      .attr("font-size", 12) // 设置字体大小
       .attr("text-anchor", "middle") // 设置文本对齐方式，居中对齐
     .selectAll() // 返回一个选择集，其中虚拟/占位元素是一系列的 <text> 文本元素，用于为各扇形的添加文本标注
-    .data(arcs) // 绑定数据，每个文本元素 <text> 对应一个扇形数据
+    .data(pie(data)) // 绑定数据，每个文本元素 <text> 对应一个扇形数据
     .join("text") // 将元素绘制到页面上
-      // 通过设置 CSS 的 transform 属性将文本元素「移动」到相应的扇形的中点
-      // 各扇形的中点是使用另一个扇形生成器 arcLabel 的方法 arcLabel.centroid(d) 计算而得的
-      .attr("transform", d => `translate(${arcLabel.centroid(d)})`)
+      // 通过设置 CSS 的 transform 属性将文本元素「移动」到相应的环状扇形的中点，该位置使用方法 arc.centroid(d) 计算而得
+      // ⚠️ 环状扇形的中点不一定在面积里，可能是在内部空白区域，如果要确保文本标注信息定位到环形上，需要根据具体情况而调整尺寸
+      .attr("transform", d => `translate(${arc.centroid(d)})`)
       // 在当前所遍历的 <text> 元素里添加一个 <tspan> 元素
       // 它相当于在 svg 语境下的 span 元素，用于为部分文本添加样式（这里用于实现文本的换行效果）
       .call(text => text.append("tspan")
