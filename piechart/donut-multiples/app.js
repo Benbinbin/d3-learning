@@ -143,8 +143,6 @@ d3.csv(dataURL, d3.autoType).then((result) => {
       .each(multiple)
     .select("g"); // 最后选择每个 <svg> 里的 <g> 容器（由于它经过了位置调整，便于后面为每个环形图添加文本注释）
 
-  // console.log(svg)
-
   // 绘制环形图的核心代码
   // 传入的参数 `d` 是（包含一系列 svg 元素的）选择集当前遍历的元素所绑定的数据
   // 它是一个对象 {state: string, sum: number, ages: array}
