@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sized Donut Multiples</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    svg.pie {
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="mx-auto my-6 text-center">
+    <h1 class="py-8 text-2xl font-bold">面积不同的环形图矩阵</h1>
+    <p>该可视化图形展示了美国各州不同年龄段人口数据</p>
+    <div class="py-2 text-sm flex flex-wrap justify-center items-center gap-4">
+      <a href="../../index.html"
+        class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">首页</a>
+      <a href="https://observablehq.com/@benbinbin/sized-donut-multiples" target="_blank"
+        class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">参考</a>
+      <a href="https://github.com/Benbinbin/d3-learning/tree/main/piechart/sized-donut-multiples/" target="_blank"
+        class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">代码</a>
+      <a href="https://datavis-note.benbinbin.com/article/d3/chart-example/d3-chart-example-pie-chart#环形图矩阵"
+        target="_blank" class="text-blue-500 hover:text-blue-600 underline transition-colors duration-300">笔记</a>
+    </div>
+  </div>
+  <div id="container" class="flex justify-center items-center"></div>
+  <script src="app.js"></script>
+</body>
+
+</html>
