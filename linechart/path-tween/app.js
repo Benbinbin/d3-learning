@@ -53,9 +53,10 @@ svg.append("path")
     // 在回调函数中 this 指向（在过渡管理器所绑定的选择集合中）当前所遍历的元素
     // 在这里的过渡管理器所绑定的选择集中只有一个 `<path>` 元素
     // 通过方法 d3.active(node[, name]) 获取指定元素的指定名称的执行中的过渡管理器
-    // 使用过渡管理器方法 `transition.attrTween(attrName[, factory])` 设置元素的属性 `attrName`，可以自定义插值器 `factory` 用于进行插值计算，即计算过渡期间属性 `attrName` 在各个时间点的值
-    // 这里更改的是 `<path>` 元素的属性 `d`，自定义了插值函数 pathTween() 该函数的具体代码实现可以查看 👇 下一个 cell
-    // 💡 另一类似的方法是 `transition.attr(attrName, value)` 它也是用于设置元素的属性 `attrName`，但直接设置了目标值 `value`（过渡结束时的最终值），而不需要设置过渡期间各个时间点的值（因为 D3 会根据属性值的数据类型，自动调用相应插值器
+    // 使用过渡管理器方法 `transition.attrTween(attrName[, factory])` 可以自定义元素属性 `attrName` 的插值方式
+    // 其中 `factory` 称为插值器工厂函数，它最终生成/返回一个插值器（插值器正是在过渡期间用于为属性 `attrName` 计算各个时间点的值）
+    // 这里更改的是 `<path>` 元素的属性 `d`，与插值相关的逻辑封装到函数 pathTween() 中，这里调用它就会返回一个插值器工厂函数（该函数的具体代码在下文）
+    // 💡 另一类似的方法是 `transition.attr(attrName, value)` 它也是用于设置元素的属性 `attrName`，但它是用于为元素的属性 `attrName` 直接设置目标值 `value`（（过渡结束时的最终值），而不需要设置过渡期间各个时间点的值（因为 D3 会根据属性值的数据类型，自动调用相应插值器）
     // 关于方法 `transition.attr()` 和 `transition.attrTween()` 的详细介绍可以参考这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-transition#过渡参数配置
     d3.active(this)
       // 这里的过渡动画的目的将路径形状从 d0 变换为 d1
@@ -75,13 +76,11 @@ svg.append("path")
     // 函数 repeat() 的作用是先将路径的形成再一次从 d0 切换为 d1，然后再恢复为 d0，最后又递归调用自身，形成循环动画，所以过渡动画的最终效果是路径在 d0 和 d1 形状之间不断切换
   });
 
-// 该函数称为插值器工厂函数 interpolator factory，它生成一个插值器
-// 💡 D3 在 d3-interpolate 模块提供了一些内置插值器，具体可以查看官方文档 https://d3js.org/d3-interpolate
-// 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-transition#插值器
+// 将与路径动态变化（插值）相关的逻辑封装为一个函数
 // 该函数接收两个参数，第一个参数 `d1` 是过渡的目标值/最终值，第二个参数 `precision` 是采样的精度
 // 通过采样将路径从贝塞尔曲线转换为分段折线（便于插值计算）
 function pathTween(d1, precision) {
-  // 返回一个自定义的插值器
+  // 返回一个插值器工厂函数 interpolator factory，它最终生成/返回一个插值器
   return function () {
     // 函数内的 this 指向（在过渡管理器所绑定的选择集合中）当前所遍历的元素，在这个示例中选择集中只有一个 `<path>` 元素
     const path0 = this;
@@ -128,10 +127,12 @@ function pathTween(d1, precision) {
       // 它会根据 b 的值类型自动调用相应的数据类型插值器
       // 具体可以参考这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-transition#通用类型插值器
       // 这里为每个采样位置构建出一个插值器，然后在过渡期间就可以计算出特定时间点该点运动到什么地方（即它的 x，y 坐标值）
+      // 💡 D3 在 d3-interpolate 模块还提供一些其他类型的内置插值器，具体可以查看官方文档 https://d3js.org/d3-interpolate
+      // 或这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-transition#插值器
       return d3.interpolate([p0.x, p0.y], [p1.x, p1.y]);
     });
 
-    // 插值器最后需要返回一个函数，它接受标准时间 t 作为参数（其值的范围是 [0, 1]）
+    // 插值器工厂函数最后需要返回一个函数（即插值器），它接受标准时间 t 作为参数（其值的范围是 [0, 1]）
     // 返回的这个函数会在过渡期间被不断调用，用于生成不同时间点的 `<path>` 元素的属性 `d` 的值
     // 当过渡未结束时（标准化时间 t < 1 时），通过调用一系列的插值器 points 计算各个采样点的运动到何处，并使用指令 `L` 将这些点连起来构成一个折线
     // 而过渡结束时（标准化时间 t = 1 时），将路径替换为真正的形状 d1（而不再使用采样点模拟生成的近似形状）

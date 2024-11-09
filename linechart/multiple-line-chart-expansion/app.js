@@ -262,8 +262,12 @@ d3.csv(
         // 更改的属性是 stroke-dasharray
         .transition()
         .ease(d3.easeLinear) // 设置缓动函数
-        // 方法 dashTween 返回一个插值器
-        // 在过渡期间，会调用这个插值器计算 stroke-dasharray 的值，以实现折线的展开动效
+        // 使用过渡管理器方法 `transition.attrTween(attrName[, factory])` 可以自定义元素属性 `attrName` 的插值方式
+        // 其中 `factory` 称为插值器工厂函数，调用它就会生成一个插值器（插值器正是在过渡期间用于为属性 `attrName` 计算各个时间点的值）
+        // 💡 另一类似的方法是 `transition.attr(attrName, value)` 它也是用于设置元素的属性 `attrName`，但它是用于为元素的属性 `attrName` 直接设置目标值 `value`（（过渡结束时的最终值），而不需要设置过渡期间各个时间点的值（因为 D3 会根据属性值的数据类型，自动调用相应插值器）
+        // 关于方法 `transition.attr()` 和 `transition.attrTween()` 的详细介绍可以参考这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-transition#过渡参数配置
+        // 方法 dashTween（该函数的具体代码在下文）是一个插值器工厂函数（它最后返回一个插值器）
+        // 在过渡期间，插值器就会被调用以计算 stroke-dasharray 的值，实现折线的展开动效
         .attrTween("stroke-dasharray", dashTween)
         // 使用 transition.end() 方法，它返回一个 Promise
         // 这个 Promise 仅在过渡管理器所绑定的选择集合的所有过渡完成时才 resolve；如果过渡被中断或取消，就会被 reject

@@ -267,7 +267,7 @@ d3.json('data.json').then(data => {
       .tween("changePath", d => {
         // console.log("d.current", d.current);
         // console.log("d.target", d.target);
-        const i = d3.interpolate(d.current, d.target); // 使用 d3 interpolate 模块的 interpolate() 方法（实际调用 interpolateObject()) 基于开始 d.current 到终点 d.target 状态进行插值，得到一系列的 {x0, x1, y0, y1} 值，并赋值给 d.current，便于后续调用（在 .attrTween() 的自定义的过渡插值器 interpolator 中作为数据源）
+        const i = d3.interpolate(d.current, d.target); // 使用 d3 interpolate 模块的 interpolate() 方法（实际调用 interpolateObject()) 基于开始 d.current 到终点 d.target 状态进行插值，得到一系列的 {x0, x1, y0, y1} 值，并赋值给 d.current，便于后续调用（在方法 .attrTween() 自定义的插值器时作为数据源）
         return t => d.current = i(t);
       })
       // 筛选出需要（原来显示）隐藏或（原来显示或隐藏）显示的节点，执行补间动画
@@ -276,8 +276,9 @@ d3.json('data.json').then(data => {
       })
       // 为元素的属性 fill-opacity 设置目标值，并使用内置的过度插值器分配 attribute tween 属性补间值。
       .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.6 : 0.4) : 0)
-      // 为元素的属性 d 分配 attribute tween 属性补间值（由于该属性是复杂的字符串，需要使用 .attrTween() 方法以使用自定义的过渡插值器 interpolator）。
-      // 返回的函数会在过渡过程中的每一帧进行调用，并传入 eased 缓动时间 t, 通常情况下在 [0, 1] 范围内
+      // 为元素的属性 d 分配 attribute tween 属性补间值（由于该属性是复杂的字符串，需要使用 .attrTween(attrName, factory) 方法，以使用自定义插值器
+      // 其中 factory 称为插值器工厂函数，它最后返回一个 interpolator 插值器
+      // 插值器就会在过渡过程中的每一帧进行调用，并传入 eased 缓动时间 t, 通常情况下在 [0, 1] 范围内
       .attrTween("d", d => () => arc(d.current)); // 即在过渡动画的每一帧中，使用之前 .tween() 插值生成的 {x0, x1, y0, y1} 值重新计算节点对应的环形路径 d
 
     // 更新文本位置和隐藏/显示（执行线性过渡）

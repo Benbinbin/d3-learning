@@ -158,7 +158,7 @@ d3.json(dataURL).then((polygon) => {
         .duration(5000) // 设置过渡的时间
         // 通过方法 `transition.attr(attrName, value)` 设置元素的属性 `attrName`，直接设置了目标值 `value`（过渡结束时的最终值），而不需要设置过渡期间各个时间点的值（因为 D3 会根据属性值的数据类型，自动调用相应插值器）
         // 关于方法 `transition.attr()` 的详细介绍可以参考这一篇笔记 https://datavis-note.benbinbin.com/article/d3/core-concept/d3-concept-transition#过渡参数配置
-        // 💡 另一类似的方法是 `transition.attrTween()` 也是用于设置元素的属性 `attrName`，都是自由度更高，可以自定义插值器 `factory` 用于进行插值计算，即计算过渡期间属性 `attrName` 在各个时间点的值
+        // 💡 另一类似的方法是 `transition.attrTween()` 也是用于设置元素的属性 `attrName`，但是自由度更高，可以自定义插值器
         .attr("d", d1)
         // 然后通过 `transition.transition()` 基于原有的过渡管理器所绑定的选择集合，创建一个新的过渡管理器
         // 新的过渡管理器会**继承了原有过渡的名称、时间、缓动函数等配置**
